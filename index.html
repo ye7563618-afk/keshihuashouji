@@ -1,0 +1,2374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="迟川" />
+  <meta name="theme-color" content="#050505" />
+  <link rel="apple-touch-icon" href="icon.jpg" />
+  <link rel="icon" href="icon.jpg" />
+  <title>CHI CHUAN · CYRUS 豪华查岗版</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --app-h: 100vh;
+      --bg: #050505; --card: #111113; --line: #232326; --crimson: #e04f4f; --gold: #cfa972;
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --top-h: calc(44px + var(--sat));
+    }
+    html.is-standalone { --top-h: max(var(--sat), 14px); }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+    input, textarea, select { user-select: text; }
+    html, body { margin: 0; padding: 0; height: var(--app-h); background: var(--bg); color: #f4f4f5; font-family: "Inter", -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; overflow: hidden; }
+    .phone-frame { height: 100%; }
+    @media (min-width: 640px) { .phone-frame { height: min(844px, 95dvh); } }
+    html.is-standalone #mockStatusBar { display: none !important; }
+    html.is-standalone #homeBarWrap { display: none !important; }
+    #mockStatusBar { height: var(--top-h); padding-top: calc(8px + var(--sat)); }
+    #bannerWrap { top: calc(var(--top-h) + 6px); }
+    .screen-layer { position: absolute; left: 0; right: 0; top: var(--top-h); bottom: 0; }
+    .safe-pb { padding-bottom: calc(var(--sab) + 18px); }
+    .no-sb { scrollbar-width: none; -ms-overflow-style: none; }
+    .no-sb::-webkit-scrollbar { display: none; }
+    .glass-app { background: linear-gradient(155deg, rgba(38,38,44,.82), rgba(14,14,18,.96)); border: 1px solid rgba(255,255,255,.11); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 8px 18px rgba(0,0,0,.6); transition: transform .14s; }
+    .glass-app:active { transform: scale(.91); }
+    .card { background: linear-gradient(160deg, #151519, #0e0e11); border: 1px solid var(--line); }
+    .sync-card { background: linear-gradient(155deg, #241d16, #14110e); border: 1px solid rgba(207,169,114,.42); color: #f8f1e6; }
+    .gold-card { background: radial-gradient(circle at 86% 18%, rgba(207,169,114,.22), transparent 48%), linear-gradient(135deg, #221d17 0%, #0d0d10 54%, #1a1612 100%); border: 1px solid rgba(207,169,114,.35); }
+    .app-layer { position: absolute; left: 0; right: 0; top: var(--top-h); bottom: 0; background: var(--bg); z-index: 40; display: flex; flex-direction: column; transform: translateX(100%); opacity: .35; pointer-events: none; transition: transform .3s cubic-bezier(.22,1,.36,1), opacity .24s; }
+    .app-layer.open { transform: translateX(0); opacity: 1; pointer-events: auto; }
+    .pages-track { display: flex; width: 100%; height: 100%; transition: transform .36s cubic-bezier(.22,1,.36,1); will-change: transform; }
+    .page-slide { width: 100%; flex-shrink: 0; padding: 0 20px; display: flex; flex-direction: column; overflow-y: auto; scrollbar-width: none; }
+    .page-slide::-webkit-scrollbar { display: none; }
+    .page-dot { width: 6px; height: 6px; border-radius: 999px; background: rgba(255,255,255,.22); transition: all .24s; }
+    .page-dot.active { width: 18px; background: var(--gold); box-shadow: 0 0 8px rgba(207,169,114,.55); }
+    #iconPreviewImg { -webkit-touch-callout: default; user-select: auto; }
+    .banner { transform: translateY(-150%); opacity: 0; transition: transform .4s cubic-bezier(.22,1,.36,1), opacity .28s; }
+    .banner.show { transform: translateY(0); opacity: 1; }
+    @keyframes breathe { 0%,100% { opacity: .55; } 50% { opacity: 1; text-shadow: 0 0 14px rgba(224,79,79,.45); } }
+    .breathe-red { color: var(--crimson); animation: breathe 2.6s ease-in-out infinite; }
+    @keyframes shakeX { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(9px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(5px)} }
+    .shake { animation: shakeX .36s ease both; }
+    @keyframes wave { 0%,100%{transform:scaleY(.38);opacity:.55} 50%{transform:scaleY(1.28);opacity:1} }
+    .v-play .vb { animation: wave .68s ease-in-out infinite; }
+    .v-play .vb:nth-child(2){animation-delay:.12s} .v-play .vb:nth-child(3){animation-delay:.24s} .v-play .vb:nth-child(4){animation-delay:.36s}
+    @keyframes pulseRing { 0%{transform:scale(.85);opacity:.75} 100%{transform:scale(1.6);opacity:0} }
+    .pulse-ring { animation: pulseRing 2.2s cubic-bezier(.22,1,.36,1) infinite; }
+    @keyframes buzz { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-2.5px)} 75%{transform:translateX(2.5px)} }
+    .buzz { animation: buzz .18s linear infinite; }
+  </style>
+</head>
+<body class="w-screen flex items-center justify-center bg-[#050505] sm:p-3" style="height:var(--app-h)">
+  <!-- 手机外框容器 -->
+  <div class="phone-frame relative w-full sm:w-[410px] sm:rounded-[50px] sm:p-[9px] sm:bg-gradient-to-br sm:from-[#323238] sm:via-[#141418] sm:to-[#08080a] sm:shadow-[0_32px_90px_rgba(0,0,0,.95),0_0_0_1px_rgba(255,255,255,.14)]">
+    <div class="relative w-full h-full sm:rounded-[41px] bg-[#050505] overflow-hidden flex flex-col" style="background-image:radial-gradient(ellipse 85% 36% at 50% 5%,rgba(255,255,255,.045),transparent 65%),radial-gradient(ellipse 75% 30% at 50% 96%,rgba(207,169,114,.04),transparent 70%)">
+
+      <!-- 状态栏 -->
+      <header id="mockStatusBar" class="relative z-[65] px-6 flex items-center justify-between text-[12.5px] font-semibold text-zinc-100 shrink-0 pointer-events-none">
+        <div class="flex items-center gap-1"><span id="stTime" class="tabular-nums">20:51</span><span class="text-[9.5px] opacity-80">➤</span></div>
+        <div class="hidden sm:block absolute left-1/2 top-2 -translate-x-1/2 w-24 h-6 rounded-full bg-black border border-white/[0.06]"></div>
+        <div class="flex items-center gap-1.5">
+          <span class="flex items-end gap-[1.5px] h-2.5"><i class="w-[2.5px] h-1 bg-zinc-200 rounded-sm"></i><i class="w-[2.5px] h-1.5 bg-zinc-200 rounded-sm"></i><i class="w-[2.5px] h-2 bg-zinc-200 rounded-sm"></i><i class="w-[2.5px] h-2.5 bg-zinc-500 rounded-sm"></i></span>
+          <span class="text-[10px] text-zinc-300">5G</span>
+          <span class="px-1.5 py-[1px] rounded-[4px] bg-zinc-100 text-zinc-950 text-[9.5px] font-bold leading-tight">80</span>
+        </div>
+      </header>
+
+      <!-- 顶部实时同步推送横幅 -->
+      <div id="bannerWrap" class="absolute left-3 right-3 z-[92] pointer-events-none">
+        <div id="banner" class="banner pointer-events-auto cursor-pointer rounded-[20px] bg-[#16161b]/95 backdrop-blur-xl border border-[#cfa972]/35 px-4 py-3 shadow-2xl">
+          <div class="flex items-center justify-between text-[11px]">
+            <span id="banTitle" class="text-[#cfa972] font-medium">微信 · 迟川（主设备同步）</span>
+            <span class="text-zinc-500">现在</span>
+          </div>
+          <p id="banTxt" class="text-[12.5px] text-zinc-100 leading-relaxed mt-1"></p>
+        </div>
+      </div>
+
+      <!-- 1. 锁屏界面 -->
+      <section id="lockScreen" class="screen-layer safe-pb z-20 flex flex-col justify-between px-6 pt-5 transition-all duration-300">
+        <div class="text-center">
+          <div id="lkTime" class="text-[68px] font-extralight leading-none tracking-tight text-zinc-100 tabular-nums">20:51</div>
+          <div class="text-[13px] text-zinc-400 mt-2">2026年11月23日 星期一</div>
+          <div class="flex items-center justify-center gap-3 mt-4">
+            <span class="w-4 h-px bg-zinc-700"></span>
+            <span class="text-[11px] tracking-[0.24em] text-zinc-400">CHI CHUAN · CYRUS</span>
+            <span class="w-4 h-px bg-zinc-700"></span>
+          </div>
+          <button id="redStatusBtn" type="button" class="breathe-red text-[12px] tracking-wider mt-2.5 px-3 py-1 rounded-full active:scale-95">迟川正在另一台设备查看</button>
+        </div>
+
+        <div class="flex flex-col items-center">
+          <div id="dots" class="flex gap-4">
+            <span class="w-2.5 h-2.5 rounded-full border border-white/35 transition-all"></span>
+            <span class="w-2.5 h-2.5 rounded-full border border-white/35 transition-all"></span>
+            <span class="w-2.5 h-2.5 rounded-full border border-white/35 transition-all"></span>
+            <span class="w-2.5 h-2.5 rounded-full border border-white/35 transition-all"></span>
+            <span class="w-2.5 h-2.5 rounded-full border border-white/35 transition-all"></span>
+            <span class="w-2.5 h-2.5 rounded-full border border-white/35 transition-all"></span>
+          </div>
+          <div id="pinErr" class="h-5 mt-2.5 text-[12px] text-[#e04f4f] opacity-0 transition-opacity">密码错误</div>
+        </div>
+
+        <div class="flex flex-col items-center">
+          <div id="lockPad" class="grid grid-cols-3 gap-x-6 gap-y-3"></div>
+          <button id="hintBtn" type="button" class="mt-4 text-[11.5px] text-zinc-500 hover:text-zinc-300 tracking-wider px-3 py-1">忘记密码提示</button>
+        </div>
+      </section>
+
+      <!-- 2. 主屏幕 (支持左右滑动翻页：3页独立桌面 + 分页圆点 + 底部 Dock) -->
+      <section id="homeScreen" class="screen-layer safe-pb z-10 flex flex-col justify-between pt-3 opacity-0 pointer-events-none scale-[.97] transition-all duration-300">
+        <div id="homePagesViewport" class="flex-1 min-h-0 overflow-hidden relative">
+          <div id="homePagesTrack" class="pages-track"></div>
+        </div>
+        <div class="px-5 pt-2 shrink-0">
+          <!-- 翻页指示点（支持点击切页，也支持左右滑动） -->
+          <div id="pageDots" class="flex items-center justify-center gap-2 mb-3"></div>
+          <div id="homeDock" class="rounded-[26px] bg-white/[0.045] backdrop-blur-xl border border-white/[0.09] px-4 py-3 flex items-center justify-between"></div>
+        </div>
+      </section>
+
+      <!-- 3. 动态应用主容器 -->
+      <section id="appLayer" class="app-layer"></section>
+
+      <!-- 4. 全屏来电 / 通话浮层 -->
+      <section id="callModal" style="padding-top:calc(var(--sat) + 46px);padding-bottom:calc(var(--sab) + 32px)" class="hidden absolute inset-0 z-[88] bg-gradient-to-b from-[#17151c] via-[#09090d] to-black flex-col items-center justify-between px-6"></section>
+
+      <!-- 5. 通用轻弹窗（转账 / 照片预览 / 隐私解锁） -->
+      <section id="overlayModal" class="hidden absolute inset-0 z-[86] bg-black/82 backdrop-blur-md items-center justify-center p-5"></section>
+
+      <!-- Toast 轻提示 -->
+      <div id="toast" style="bottom:calc(var(--sab) + 28px)" class="pointer-events-none opacity-0 translate-y-3 transition-all duration-250 absolute left-1/2 -translate-x-1/2 z-[98] px-4 py-2 rounded-full bg-zinc-900/95 border border-[#cfa972]/30 text-[12px] text-zinc-100 whitespace-nowrap shadow-xl"></div>
+
+      <!-- 底部 Home 指示条 -->
+      <div id="homeBarWrap" class="absolute bottom-0 inset-x-0 h-5 flex items-center justify-center z-[80] pointer-events-none">
+        <button id="homeBar" type="button" aria-label="返回桌面" class="pointer-events-auto w-32 h-1 rounded-full bg-white/35 hover:bg-white/65 transition"></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================================
+       〇、iOS 14 Pro 桌面全屏真实屏高补丁与独立模式适配
+       ========================================================================= */
+    const IS_STANDALONE = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+    if (IS_STANDALONE) document.documentElement.classList.add('is-standalone');
+    function syncViewportHeight() {
+      const h = IS_STANDALONE ? Math.max(window.innerHeight, window.screen.height) : window.innerHeight;
+      document.documentElement.style.setProperty('--app-h', h + 'px');
+    }
+    syncViewportHeight();
+    window.addEventListener('resize', syncViewportHeight);
+    window.addEventListener('orientationchange', () => { syncViewportHeight(); setTimeout(syncViewportHeight, 260); });
+
+    /* =========================================================================
+       一、图标集合 & Web Audio 合成音效引擎（零外部音频 URL）
+       ========================================================================= */
+    const IC = {
+      wechat: '<path d="M9.5 16.5c-3.6 0-6.5-2.4-6.5-5.4S5.9 5.7 9.5 5.7s6.5 2.4 6.5 5.4c0 1-.3 2-.9 2.8l.7 2.1-2.3-.7c-1.2.8-2.6 1.2-4 1.2z"/><path d="M16.2 10.6c2.7.3 4.8 2.1 4.8 4.4 0 1-.4 1.9-1 2.7l.6 1.8-1.9-.6c-.9.5-1.9.8-3 .8-2.1 0-4-.9-4.9-2.3"/>',
+      moments: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v6M12 15v6M3 12h6M15 12h6"/>',
+      phone: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>',
+      wallet: '<rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18M7 15h4"/>',
+      notes: '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="14 3 14 9 20 9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/>',
+      photos: '<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 15l-4.5-4.5L9 18l-2.5-2.5L3 19"/>',
+      browser: '<circle cx="12" cy="12" r="9"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>',
+      mail: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M4 7l8 6 8-6"/>',
+      calendar: '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/>',
+      maps: '<path d="M12 21s-6.5-5.8-6.5-11a6.5 6.5 0 1 1 13 0c0 5.2-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/>',
+      health: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21.3l7.8-7.8 1-1.1a5.5 5.5 0 0 0 0-7.8z"/>',
+      settings: '<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"/>',
+      back: '<polyline points="15 18 9 12 15 6"/>',
+      del: '<path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><path d="M18 9l-6 6M12 9l6 6"/>',
+      lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+      finger: '<path d="M12 11c0 3.5-1 6.8-2.8 9.6M5.8 18.5A14 14 0 0 0 8 11a4 4 0 1 1 8 0c0 1-.1 2-.2 3M13.7 20.8A22 22 0 0 0 15.2 17M19 18.1c.6-2.3 1-4.7 1-7.1A8 8 0 0 0 8 4.1M3 15.4c.6-1.3 1-2.8 1-4.4 0-1.5.4-2.8 1.1-4"/>',
+      music: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+      mic: '<rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="22"/>',
+      corp: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h6"/>',
+      ai: '<path d="M12 2l2.2 6.8L21 11l-6.8 2.2L12 20l-2.2-6.8L3 11l6.8-2.2L12 2z"/>',
+      icongen: '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M12 5v2M12 17v2M5 12h2M17 12h2"/>'
+    };
+    const svg = (k, s = 22, c = '') => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="${c}">${IC[k] || ''}</svg>`;
+
+    const SFX = (() => {
+      let ac = null;
+      const tone = (f, d = .08, t = 'sine', g = .04, dl = 0) => {
+        if (!S.sound) return;
+        try {
+          ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+          if (ac.state === 'suspended') ac.resume();
+          const n = ac.currentTime + dl, o = ac.createOscillator(), gn = ac.createGain();
+          o.type = t; o.frequency.setValueAtTime(f, n);
+          gn.gain.setValueAtTime(.0001, n); gn.gain.exponentialRampToValueAtTime(g, n + .012); gn.gain.exponentialRampToValueAtTime(.0001, n + d);
+          o.connect(gn); gn.connect(ac.destination); o.start(n); o.stop(n + d + .02);
+        } catch {}
+      };
+      return {
+        tap: () => tone(560, .04, 'sine', .028),
+        err: () => { tone(210, .09, 'triangle', .045); tone(165, .12, 'triangle', .045, .09); },
+        ok: () => { tone(587, .1, 'sine', .04); tone(880, .18, 'sine', .04, .09); },
+        msg: () => { tone(760, .08, 'sine', .038); tone(1046, .15, 'sine', .034, .07); },
+        voice: () => { tone(620, .06, 'sine', .032); tone(820, .09, 'sine', .028, .06); },
+        cash: () => { tone(659, .09, 'sine', .04); tone(880, .1, 'sine', .04, .08); tone(1318, .22, 'sine', .045, .16); },
+        ring: () => { tone(523, .22, 'sine', .04); tone(659, .26, 'sine', .035, .24); }
+      };
+    })();
+
+    /* =========================================================================
+       二、全局状态、14个彩蛋、3页桌面配置与双协议 API 引擎配置
+       ========================================================================= */
+    const PASS = '122900';
+    const EGG_DEFS = [
+      { id: 'e1', t: '锁屏连点红字', h: '在锁屏页连续轻触3次“迟川正在另一台设备查看”' },
+      { id: 'e2', t: '手撕投行VP苏晚晴', h: '在微信中与苏晚晴交锋回复' },
+      { id: 'e3', t: '划清校友温知夏边界', h: '在微信中与海外校友温知夏交锋' },
+      { id: 'e4', t: '秒杀公关姜语汐', h: '在微信中回击想送领带的姜语汐' },
+      { id: 'e5', t: '朋友圈公开宣誓主权', h: '在朋友圈评论苏晚晴的深夜酒杯动态' },
+      { id: 'e6', t: 'LUMIÈRE 吃醋大反转', h: '点开微信里 LUMIÈRE 珠宝顾问的私密定制消息' },
+      { id: 'e7', t: '直击社死搜索记录', h: '打开浏览器并点击迟川的秘密搜索词条' },
+      { id: 'e8', t: '偷看秘密日记深情篇', h: '指纹解锁备忘录秘密日记并阅读第 03–05 篇' },
+      { id: 'e9', t: '抓包心率飙升 118 bpm', h: '打开健康 App 查看查岗引发的心率峰值' },
+      { id: 'e10', t: '爸爸的亿级零花转账', h: '在钱包里点击「给宝宝转账」转出一笔零花钱' },
+      { id: 'e11', t: '多轮拉扯逼出迟川封杀', h: '在微信与任一吃醋对象连续交锋3轮，看迟川亲自下场狠狠护短' },
+      { id: 'e12', t: '翻到第二页私密录音', h: '左滑到桌面第2页，打开「录音机」听完迟川深夜未发出的秘密语音' },
+      { id: 'e13', t: '深夜歌单隐藏曲目', h: '在桌面第2页「音乐」点开《给迟琰的雨夜》私人曲目' },
+      { id: 'e14', t: '突击新岚总裁内网', h: '滑到桌面第3页打开「新岚内网」，查收拦截越界访客的红头指令' }
+    ];
+
+    const AI_LS_KEY = 'cc_phone_ai_cfg_v3';
+    const GEMINI_PRESETS = [
+      'gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.5-pro',
+      'gemini-3.1-flash-lite', 'gemini-3.1-flash', 'gemini-3-flash-preview',
+      'gemini-3.0-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-flash',
+      'gemini-2.5-pro', 'gemini-2.0-flash'
+    ];
+    const OPENAI_PRESETS = [
+      'gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini', 'gpt-4.1', 'gpt-5-mini',
+      'deepseek-chat', 'deepseek-reasoner', 'claude-3-7-sonnet-20250219',
+      'qwen-plus', 'glm-4-flash'
+    ];
+    const OPENAI_URLS = [
+      { n: 'OpenAI 官方', u: 'https://api.openai.com/v1' },
+      { n: 'DeepSeek', u: 'https://api.deepseek.com/v1' },
+      { n: 'OpenRouter', u: 'https://openrouter.ai/api/v1' },
+      { n: '硅基流动', u: 'https://api.siliconflow.cn/v1' }
+    ];
+
+    function loadAiCfg() {
+      const fb = {
+        on: false, provider: 'gemini',
+        geminiKey: '', geminiModel: 'gemini-3.5-flash-lite', geminiCustom: '', geminiFetched: [],
+        openaiUrl: 'https://api.openai.com/v1', openaiKey: '', openaiModel: 'gpt-4o-mini', openaiCustom: '', openaiFetched: []
+      };
+      try { return Object.assign(fb, JSON.parse(localStorage.getItem(AI_LS_KEY) || '{}')); } catch { return fb; }
+    }
+    function saveAiCfg() { try { localStorage.setItem(AI_LS_KEY, JSON.stringify(S.ai)); } catch {} }
+
+    const S = {
+      unlocked: false, pin: '', lockBusy: false, redTaps: 0, sound: true,
+      homePage: 0,
+      app: null, chatId: null, search: '', playingVoice: null, playingTrack: null, playingRec: null,
+      notesTab: 'baobao', diaryUnlocked: false, noteOpen: null,
+      photosPrivateUnlocked: false,
+      browserTab: 'history', browserOpen: null,
+      mailTab: 'inbox', mailOpen: null,
+      phoneTab: 'recents', dialBuf: '',
+      calM: 11, calD: 23, mapId: 'summit',
+      momentsUnread: 3, missedCalls: 1, mailUnread: 1,
+      balShow: true, cashBal: 12860420.88, cardBal: 684500000.00, babyFund: 52000000.00,
+      eggs: {}, rivalRound: { suwanqing: 0, wenzhixia: 0, jiangyuxi: 0 }, momentRound: { m1: 0, m2: 0, m3: 0 },
+      suAutoFired: false, dadAutoFired: false, healthFired: false, draftFired: false,
+      suTimer: null, banTimer: null, banAction: null, callTick: null, ringTick: null, callActive: false,
+      ai: loadAiCfg()
+    };
+
+    // 3页真实手机桌面排布（支持左右滑动 + 圆点切换）
+    const PAGE_APPS = [
+      // 第 1 页：核心查岗日常
+      [['wechat', '微信'], ['moments', '朋友圈'], ['phone', '通话'], ['wallet', '钱包'],
+       ['notes', '备忘录'], ['photos', '相册'], ['calendar', '日历'], ['maps', '地图']],
+      // 第 2 页：隐秘线索与私人角落
+      [['browser', '浏览器'], ['mail', '邮件'], ['health', '健康'], ['music', '音乐'],
+       ['recorder', '录音机'], ['settings', '设置']],
+      // 第 3 页：总裁私密终端与定制工具
+      [['intranet', '新岚内网'], ['aiconfig', 'API引擎'], ['icongen', '桌面图标'], ['settings', '彩蛋面板']]
+    ];
+    const DOCK_APPS = ['wechat', 'phone', 'moments', 'settings'];
+
+    let CHATS = [], MOMENTS = [], CALL_LOGS = [], LEDGER = [];
+
+    function initData() {
+      S.cashBal = 12860420.88; S.cardBal = 684500000.00; S.babyFund = 52000000.00;
+      S.momentsUnread = 3; S.missedCalls = 1; S.mailUnread = 1;
+      CHATS = [
+        {
+          id: 'baobao', av: '宝', warm: true, name: '宝宝', tag: '置顶', time: '20:42', unread: 1,
+          msgs: [
+            { id: 'b1', side: 'R', from: '迟川', t: '06:55', voice: 12, played: true, txt: '刚晨泳完1500米，宝宝醒了没有？今天外面降温，记得穿米白色羊绒外套，早餐我温在烤箱里了。' },
+            { id: 'b2', side: 'L', from: '宝宝', t: '08:12', text: '醒啦爸爸！昨晚峰会听说好多漂亮姐姐围着你敬酒，你老实交代哦哼哼' },
+            { id: 'b3', side: 'R', from: '迟川', t: '08:15', voice: 14, played: false, txt: '别听外面瞎传，琰琰。我九点四十就提前离场了，一滴酒没碰，顺路绕去城西给你买了无麸质栗子蛋糕。' },
+            { id: 'b4', side: 'L', from: '宝宝', t: '20:38', text: '哼，我才不信呢，现在拿你备用机全面查岗！查出一点小尾巴爸爸今晚就睡书房！' },
+            { id: 'b5', side: 'R', from: '迟川', t: '20:42', voice: 10, played: false, txt: '放心查，宝宝。手机里里外外都没防着你，不过……浏览器和文件传输助手里有些东西，看完别笑我。' }
+          ]
+        },
+        {
+          id: 'suwanqing', av: '苏', rival: true, name: '苏晚晴', tag: '投行VP', time: '20:35', unread: 2,
+          msgs: [
+            { id: 'sw0', side: 'L', from: '苏晚晴', t: '20:28', img: { bg: 'from-[#281217] via-[#120b0e] to-[#09090b]', title: '峰会晚宴红酒杯与西装袖口', sub: 'BORDEAUX · PRIVATE TABLE' } },
+            { id: 'sw1', side: 'L', from: '苏晚晴', t: '20:30', text: '迟总，昨晚峰会你的羊绒外套落在我助理车上了。' },
+            { id: 'sw2', side: 'R', from: '迟川', t: '20:32', text: '那件外套已让林助理联系酒店寄存处核对，不必劳烦苏总私人处理。' },
+            { id: 'sw3', side: 'L', from: '苏晚晴', t: '20:35', voice: 14, played: false, txt: '今晚八点老地方，顺便把并购条款最后两页对完？就我们俩，我让侍酒师留了你常喝的那支年份。' }
+          ]
+        },
+        {
+          id: 'wenzhixia', av: '温', rival: true, name: '温知夏', tag: '海外校友', time: '20:10', unread: 1,
+          msgs: [
+            { id: 'wz0', side: 'L', from: '温知夏', t: '19:55', img: { bg: 'from-[#141c2b] via-[#0c111a] to-[#08090c]', title: '波士顿旧照 · 雪夜图书馆', sub: 'BOSTON · WINTER ARCHIVE' } },
+            { id: 'wz1', side: 'L', from: '温知夏', t: '19:56', text: '阿川，整理硬盘翻到当年留学暴雪那晚的合照。听说你现在身旁有人了，叫迟琰？真好奇是什么样的女孩，能让你连《潜行者》都愿意陪着一遍遍重看。' },
+            { id: 'wz2', side: 'R', from: '迟川', t: '20:04', text: '请称呼迟总或迟川。旧照不必发我，我太太很在意边界，我也一样。' },
+            { id: 'wz3', side: 'L', from: '温知夏', t: '20:10', voice: 11, played: false, txt: '还是这么冷淡呀。不过周末市美术馆那场库布里克放映会，你要是方便的话，顺路打个招呼总可以吧？' }
+          ]
+        },
+        {
+          id: 'jiangyuxi', av: '姜', rival: true, name: '姜语汐', tag: '公关顾问', time: '20:18', unread: 2,
+          msgs: [
+            { id: 'jy0', side: 'L', from: '姜语汐', t: '20:15', img: { bg: 'from-[#0e241d] via-[#091511] to-[#08090b]', title: '两条墨绿色真丝领带', sub: 'SILK TIE · VIP SELECTION' } },
+            { id: 'jy1', side: 'L', from: '姜语汐', t: '20:16', text: '川哥～今晚慈善晚宴我帮你挑了两条领带，待会亲自送去你办公室帮你系上呀？听说迟琰妹妹今天不来呢～' },
+            { id: 'jy2', side: 'L', from: '姜语汐', t: '20:18', voice: 9, played: false, txt: '川哥怎么不回我呀，那我直接拿着领带上顶楼找你咯，保证不耽误你太久～' }
+          ]
+        },
+        {
+          id: 'chenxu', av: '陈', name: '陈序', tag: '战略顾问', time: '20:20', unread: 1,
+          msgs: [
+            { id: 'cx1', side: 'L', from: '陈序', t: '20:15', voice: 16, played: false, txt: '迟川，昨晚苏晚晴往你旁边凑那桌我全程录了证，你离她足足两米远，迟琰要是查岗直接把记录甩给她！' },
+            { id: 'cx2', side: 'L', from: '陈序', t: '20:20', text: '顺便问一句，你昨晚烤焦的第8个无麸质面包还没扔吧？还有那件给琰琰织的羊绒毛衣，领口收针学会没？' }
+          ]
+        },
+        {
+          id: 'lumiere', av: 'L', gold: true, name: 'LUMIÈRE 珠宝顾问', tag: 'VIP定制', time: '19:45', unread: 1,
+          msgs: [
+            { id: 'lu1', side: 'R', from: '迟川', t: '11月12日', text: '按确认图打造，内圈激光刻字：For Y.Y. · 迟琰。卡片手写内容附后，绝对保密。' },
+            { id: 'lu2', side: 'L', from: 'LUMIÈRE 珠宝顾问', t: '19:45', text: '迟先生，您定制的女士私密惊喜款已完工，切勿泄露。戒圈内刻“For Y.Y. · 迟琰”与专属附卡“致我唯一的蓝图：迟琰”均已封装完毕，随时恭候您亲取。' }
+          ]
+        },
+        {
+          id: 'sunyu', av: '孙', name: '孙遇', tag: '研发总监', time: '19:10', unread: 0,
+          msgs: [
+            { id: 'sy1', side: 'L', from: '孙遇', t: '19:02', text: '迟总，固-固态电池最新循环测试保持率冲到 99.4% 了！林女士当年的设想我们真做成了！' },
+            { id: 'sy2', side: 'L', from: '孙遇', t: '19:10', text: '另外替全组谢谢迟琰！她昨晚让闪送过来的夜宵甜品直接救活了熬夜的兄弟们，嫂子太细心了！' },
+            { id: 'sy3', side: 'R', from: '迟川', t: '19:12', text: '数据发我邮箱，明天研发部全员调休半天并记专项奖。迟琰那边我替你们转达。' }
+          ]
+        },
+        {
+          id: 'zhoumo', av: '周', name: '周墨教授', tag: '恩师', time: '18:30', unread: 0,
+          msgs: [
+            { id: 'zm1', side: 'L', from: '周墨教授', t: '18:22', text: '小川，这周六下午别总闷在写字楼里，带迟琰来郊外小院喝茶，我让阿姨新做了桂花糕。' },
+            { id: 'zm2', side: 'R', from: '迟川', t: '18:30', text: '好，周老师。周六三点我准时带琰琰过去，顺便把您念叨的精装版《货币哲学》带上。' }
+          ]
+        },
+        {
+          id: 'linzhuli', av: '林', name: '林助理', tag: '首席特助', time: '19:50', unread: 0,
+          msgs: [
+            { id: 'lz1', side: 'L', from: '林助理', t: '19:50', text: '迟总，已全部办妥：1.苏晚晴女士与姜语汐女士的所有私人邀约已正式婉拒并移出晚宴核心名单；2.南湾海边画室地块产权已最终落定至迟琰小姐名下；3.您订的蓝鳍刺身与无麸质可颂已送抵云顶公寓。' },
+            { id: 'lz2', side: 'R', from: '迟川', t: '19:52', text: '辛苦，明早把公关部对接人更换函发给对方公司。' }
+          ]
+        },
+        {
+          id: 'rdgroup', av: '岚', name: '新岚·固态电池核心组 (12)', tag: '群聊', time: '18:05', unread: 0, group: true,
+          msgs: [
+            { id: 'g1', side: 'R', from: '迟川', t: '17:58', text: '各子课题组今晚七点前提交热失控边界数据，无需加班。' },
+            { id: 'g2', side: 'L', from: '系统提示', t: '18:01', sys: true, text: '“迟川”撤回了一条图片消息' },
+            { id: 'g3', side: 'L', from: '孙遇', t: '18:02', text: '哈哈哈哈老板手速再快我也看见了！那盆熊童子多肉肥嘟嘟的，发错群打算发给琰琰的吧？' },
+            { id: 'g4', side: 'R', from: '迟川', t: '18:05', text: '看数据。' }
+          ]
+        },
+        {
+          id: 'yarnshop', av: '绒', name: '云顶毛线坊', tag: '客服', time: '11月21日', unread: 0,
+          msgs: [
+            { id: 'ys1', side: 'L', from: '云顶毛线坊', t: '11月21日', text: '迟先生您好，您追加的20团意大利奶白色Baby山羊绒线已发出（保密无品名包装）。附赠视频链接：《给女朋友织毛衣无痕收针看这里.mp4》，祝您织造顺利！' },
+            { id: 'ys2', side: 'R', from: '迟川', t: '11月21日', text: '收到，不要发短信通知收件人，写我办公室地址。' }
+          ]
+        },
+        {
+          id: 'drfang', av: '方', name: '方医生', tag: '私人医生', time: '昨天 16:10', unread: 0,
+          msgs: [
+            { id: 'df1', side: 'L', from: '方医生', t: '昨天 16:05', text: '迟总，你的麸质过敏虽不致命但别总偷偷试吃烤面包。另外你要的迟琰小姐生理期暖腹贴、补气血食谱和43℃恒温热敷方案我发你了。' },
+            { id: 'df2', side: 'R', from: '迟川', t: '昨天 16:10', text: '谢谢方医生，面包我换成了纯无麸质粉，只是火候还没掌握好。食谱我已存备忘录。' }
+          ]
+        },
+        {
+          id: 'chiweichen', av: '维', name: '迟维琛', tag: '父亲', time: '11月19日', unread: 0,
+          msgs: [
+            { id: 'cw1', side: 'L', from: '迟维琛', t: '11月19日', text: '迟川，你把我和老股东的采购签字权全部收回，是真不顾父子情面了？' },
+            { id: 'cw2', side: 'R', from: '迟川', t: '11月19日', text: '十七岁那年您带外人进门时，就没有情面可谈。新岚是我母亲的心血，按审计与章程办事。' }
+          ]
+        },
+        {
+          id: 'shenmanli', av: '沈', name: '沈曼丽', tag: '继母', time: '昨天 19:00', unread: 0,
+          msgs: [
+            { id: 'sm1', side: 'L', from: '沈曼丽', t: '昨天 18:52', text: '小川，听说你把那位迟琰小姐护得跟眼珠子似的，怎么不带回老宅让阿姨帮着掌掌眼呀？' },
+            { id: 'sm2', side: 'R', from: '迟川', t: '昨天 19:00', text: '迟琰不需要任何人评判，更不必去老宅受气。请管好您自己的事。' }
+          ]
+        },
+        {
+          id: 'linshaoheng', av: '衡', name: '林绍衡', tag: '舅舅', time: '11月18日', unread: 0,
+          msgs: [
+            { id: 'ls1', side: 'L', from: '林绍衡', t: '11月18日', text: '小川，新能源储能二期把舅舅名下公司塞进供应链，看在文君面子上不过分吧？' },
+            { id: 'ls2', side: 'R', from: '迟川', t: '11月18日', text: '请勿用我母亲当筹码。所有供应商一律公开招标，达标者入围。' }
+          ]
+        },
+        {
+          id: 'filehelper', av: '文', name: '文件传输助手', tag: '私密备忘', time: '凌晨 02:14', unread: 0,
+          msgs: [
+            { id: 'fh1', side: 'R', from: '迟川', t: '11月21日', text: '📋 《迟琰吃醋安抚 SOP（v3.2 绝密）》\n1. 第一时间交出主副设备与GPS记录，绝不敷衍；\n2. 抱紧她把涉及异性的来龙去脉逐字交代；\n3. 绝不冷处理超过10秒，声音放软叫她宝宝；\n4. 当面清理无关联系人并奉上无麸质甜品或黑卡。' },
+            { id: 'fh2', side: 'R', from: '迟川', t: '11月22日', text: '📐 《南湾海边画室平面规划_终稿.pdf》\n二楼整层朝南4.2m挑高、防眩光低铁玻璃、独立恒温除湿画材间，留出看海露台与多肉花架。' },
+            { id: 'fh3', side: 'R', from: '迟川', t: '凌晨 02:14', voice: 18, played: false, txt: '……出差第二天，凌晨两点十四，睡不着。刚把毛衣袖口又织了八行。宝宝，你睡得安稳吗？一想到明天傍晚就能回去听你叫我爸爸，我就觉得这世上所有的算计和奔波都有了落处。' }
+          ]
+        }
+      ];
+
+      MOMENTS = [
+        {
+          id: 'm1', av: '苏', author: '苏晚晴', time: '18分钟前', rival: true,
+          text: '有些并购案，只有深夜坐下来聊才最透彻。🥂 感谢今晚的默契。',
+          art: { bg: 'from-[#2c1218] via-[#130a0d] to-[#08080a]', k: 'BORDEAUX · MIDNIGHT', sub: '外滩私人酒廊 · 红酒杯与模糊西装袖口' },
+          liked: false, likes: ['投行-周总', '公关部-林琳'], hidden: false,
+          comments: [{ a: '陈序', t: '苏总构图不错，可惜那半只袖子是我穿的。迟川九点四十就赶回家陪迟琰了，别误导大家。' }],
+          quick: '请删图。昨晚我提前离场且未私下饮酒。另外，我太太迟琰正在看这条。'
+        },
+        {
+          id: 'm2', av: '温', author: '温知夏', time: '1小时前', rival: true,
+          text: '旧硬盘里永远存着二十二岁的雪。听说故人如今有了软肋，真好。',
+          art: { bg: 'from-[#141e30] via-[#0c121d] to-[#08090c]', k: 'BOSTON · SNOWY NIGHT', sub: '雪夜图书馆旧影' },
+          liked: false, likes: ['校友会-赵铭'],
+          comments: [],
+          quick: '过去的事早已翻篇，迟琰是我的底气与全部未来，请勿再发暗指文案。'
+        },
+        {
+          id: 'm3', av: '姜', author: '姜语汐', time: '2小时前', rival: true,
+          text: '帮某位挑剔的大总裁选的晚宴配饰，猜猜今晚会系哪条呀～✨',
+          art: { bg: 'from-[#0e261f] via-[#091612] to-[#07090a]', k: 'EMERALD SILK TIES', sub: '两条墨绿色真丝领带' },
+          liked: false, likes: ['时尚编辑-Kiki'],
+          comments: [],
+          quick: '不用猜，我只系迟琰挑的领带。公关对接已更换，不必再费心。'
+        },
+        {
+          id: 'm4', av: '迟', author: '迟川', time: '3小时前', vis: '仅宝宝可见 🔒',
+          text: '今天把窗台重新规整了一遍。左边这盆长新芽了，像你早晨刚醒时翘起来的呆毛。',
+          art: { bg: 'from-[#241d15] via-[#12100d] to-[#09090a]', k: 'SUCCULENT & CASHMERE', sub: '阳光窗台多肉与半截米白毛衣袖' },
+          liked: true, likes: ['宝宝'],
+          comments: [{ a: '宝宝', t: '哈哈哈哈爸爸又偷偷拿我呆毛打比方！' }],
+          quick: '宝宝查岗辛苦了，待会回家给你摸摸这盆新芽。'
+        },
+        {
+          id: 'm5', av: '陈', author: '陈序', time: '5小时前',
+          text: '某位身家数亿的新岚CEO，昨晚打电话严肃探讨了四十分钟为什么无麸质面团发不起来。@迟川 直接买间烘焙坊送给琰琰算了。',
+          art: { bg: 'from-[#221912] via-[#120e0b] to-[#080809]', k: 'WHISKY & BURNT LOAF', sub: '威士忌与烤焦的无麸质面包' },
+          liked: true, likes: ['迟川', '孙遇', '周墨教授'],
+          comments: [
+            { a: '孙遇', t: '迟总要不把面团拿实验室测测含水率？' },
+            { a: '周墨教授', t: '小川有这份耐性，比当年做实验还认真，迟琰有福气。' }
+          ]
+        },
+        {
+          id: 'm6', av: '孙', author: '孙遇', time: '昨天 23:12',
+          text: '核心参数突破 99.4%！感谢迟总批的夜宵，更感谢琰琰挑的甜品，救了全组！',
+          art: { bg: 'from-[#0e1b2a] via-[#091018] to-[#07090d]', k: 'SOLID-STATE · 99.4%', sub: '林文君纪念实验室 · 循环衰减曲线' },
+          liked: true, likes: ['迟川', '陈序', '林助理'],
+          comments: [{ a: '迟川', t: '辛苦各位，专项奖已批。' }]
+        },
+        {
+          id: 'm7', av: '沈', author: '沈曼丽', time: '昨天 19:40',
+          text: '家和万事兴，希望小川忙于事业之余，也多带那位迟小姐回家吃顿饭。',
+          art: { bg: 'from-[#211a17] via-[#120e0d] to-[#090809]', k: 'AFTERNOON TEA', sub: '骨瓷茶具与欧式甜点架' },
+          liked: false, likes: ['林绍衡'],
+          comments: []
+        },
+        {
+          id: 'm8', av: '周', author: '周墨教授', time: '2天前',
+          text: '“金钱只是通往最终价值的桥梁，而人是无法栖居在桥上的。” 难得见小川眼里有光了。',
+          art: { bg: 'from-[#1f1911] via-[#110e0a] to-[#080809]', k: 'SIMMEL · TEA STUDY', sub: '郊外书房岩茶与《货币哲学》' },
+          liked: true, likes: ['迟川', '陈序', '孙遇'],
+          comments: [{ a: '迟川', t: '周老师，这周六下午带迟琰去陪您喝茶。' }]
+        },
+        {
+          id: 'm9', av: '迟', author: '迟川', time: '11月18日', vis: '公开',
+          text: '蓝图已定，余生唯一变量：迟琰。',
+          art: { bg: 'from-[#101824] via-[#0a0f17] to-[#06070a]', k: 'SOUTH BAY · HORIZON', sub: '暗夜海岸前的两杯热咖啡' },
+          liked: true, likes: ['陈序', '孙遇', '周墨教授', '林助理', '方医生'],
+          comments: [{ a: '陈序', t: '百年难遇的官宣，这下某些人总该死心了吧。' }]
+        }
+      ];
+
+      CALL_LOGS = [
+        { id: 'su', name: '苏晚晴', tag: '投行VP', type: '未接来电', dur: '已拒接', time: '20:36', missed: true },
+        { id: 'dad', name: '宝宝（迟琰）', tag: '置顶', type: '呼出', dur: '52分18秒', time: '昨晚 22:30' },
+        { id: 'chenxu', name: '陈序', tag: '战略顾问', type: '呼入', dur: '16分04秒', time: '今天 15:10' },
+        { id: 'lin', name: '林助理', tag: '首席特助', type: '呼出', dur: '06分42秒', time: '今天 19:45' },
+        { id: 'wen', name: '温知夏', tag: '海外校友', type: '已拒接', dur: '未接通', time: '昨天 20:12', missed: true }
+      ];
+
+      LEDGER = [
+        { m: 'LUMIÈRE 定制钻戒尾款', c: '保密高定', a: -1680000, t: '11月22日', n: '内圈刻字 For Y.Y. · 迟琰，附卡片“致我唯一的蓝图：迟琰”。' },
+        { m: '南湾海边画室地块契税', c: '不动产蓝图', a: -28500000, t: '11月20日', n: '产权登记至迟琰名下，含二楼朝南全景画室结构审批。' },
+        { m: '退回苏晚晴峰会酒水转账', c: '已拒收', a: 0, t: '昨晚 21:45', n: '系统记录：已原路退回，备注“公私分明，不必转账”。' },
+        { m: '云顶毛线坊顶级羊绒线', c: '私密采购', a: -4880, t: '11月21日', n: '20团意大利奶白色Baby山羊绒，给琰琰织过冬毛衣。' },
+        { m: '无麸质有机烘焙原料', c: '餐饮食材', a: -620, t: '昨天 17:15', n: '进口椰子粉、车前子壳粉与无麸质黄油，第9次挑战面包。' },
+        { m: '给宝宝的日常零花', c: '亲密转账', a: -131400, t: '今天 09:00', n: '备注：宝宝随便买点小甜品和画材，副卡无限额。' },
+        { m: '新岚能源季度分红', c: '企业收益', a: 46200000, t: '11月15日', n: '新岚能源集团 Q3 核心股权分红入账。' }
+      ];
+    }
+
+    const NOTES_BAOBAO = [
+      { id: 'nb1', t: '迟琰的喜好与禁忌', d: '今天 08:20', p: '爱吃厚切和牛、蓝鳍刺身、海鲜火锅与无麸质可颂；冬天手脚怕冷…', c: '怕工作太忙漏掉任何细节，全部记牢：\n1. 饮食：最爱厚切和牛、蓝鳍刺身、海鲜火锅与刚出炉的无麸质可颂，热饮少糖。\n2. 习惯：冬天入睡前手脚容易凉，卧室温控提前调至 22.5℃；画画时偏爱南向柔和自然光。\n3. 雷区：不喜欢老宅里沈曼丽虚伪的试探，也不喜欢工作场合没分寸的异性，一律由我挡在门外。' },
+      { id: 'nb2', t: '生理期护理清单', d: '11月19日', p: '每月25–27日前后。提前备43℃恒温暖腹贴、红糖姜枣，推掉晚间应酬…', c: '方医生核对过的护理方案：\n- 提前三天暂停冰饮与生冷刺身，改为热汤与清炖牛腩。\n- 备好 43℃ 恒温暖腹贴、羊绒热水袋与古法红糖老姜茶。\n- 周期前两天清空所有晚间应酬，六点前回家陪着琰琰。' },
+      { id: 'nb3', t: '秘密毛衣织造进度：72%', d: '昨晚 02:10', p: '意大利奶白色山羊绒，前后片已完工，还差右袖口收针…', c: '保密项目（绝不能提前被宝宝发现）：\n- 材质：最软的奶白色 Baby 山羊绒，贴身穿绝不扎脖子。\n- 进度：前片 100%，后片 100%，左袖 100%，右袖还差最后 18 行。\n- 检讨：肩线漏了一针，查了图解连夜拆了重织齐，降温前一定交工。' },
+      { id: 'nb4', t: '无麸质面包失败复盘（第9次）', d: '昨天 23:40', p: '自己麸质过敏但戒不掉面包香，第8次烤焦，第9次硬度堪比电池外壳…', c: '不信我连固态电池都做得出来，还搞不定一只无麸质面包：\n- 第8次：烤箱温度偏高 15℃，外壳焦黑，被陈序拍去发了朋友圈。\n- 第9次：车前子壳粉放太多，硬得像电芯外壳。\n- 下次调整：增加温水醒发 20 分钟，做成功再端给宝宝吃。' },
+      { id: 'nb5', t: '海边画室与环球蓝图', d: '11月20日', p: '南湾独栋已过户至迟琰名下，二楼整层画室 + 环游世界四季路线…', c: '不是空头支票，按季度严格执行：\n【南湾画室】产权已落定至迟琰名下。二楼整层朝南 4.2m 挑高，配防眩光低铁落地窗与独立恒温画材间，推开窗就是整片海。\n【环游世界】冰岛极光 → 京都晚秋 → 南法蔚蓝海岸写生 → 新西兰特卡波湖星空，每处住满两周，慢慢陪她看世界。' },
+      { id: 'nb6', t: '迟琰吃醋应急预案', d: '昨晚 23:55', p: '当琰琰因为无关异性吃醋时：10秒内抱紧，绝不冷战，交出全部记录…', c: '最高优先级预案：\n1. 绝不反问“你至于吗”，她吃醋是因为在乎我。\n2. 立刻交出主副手机、GPS定位与助理佐证，把来龙去脉逐字说清楚。\n3. 当着她的面拉黑越界者或更换项目对接人。\n4. 放软语气叫她宝宝，抱在怀里哄到她重新愿意叫我爸爸为止。' }
+    ];
+
+    const DIARIES = [
+      { id: 'd1', t: '01.[数月前·盛夏] 暴雨', m: '陈序来访', c: '陈序今天不请自来，拎着一瓶威士忌，直接入侵了我的公寓。他大概是看出我最近神经过于紧绷，几近崩溃。\n\n我们没怎么谈公司具体的麻烦，只是并排坐在落地窗前，看着楼下的车流。他聊起我们留学时，为了一个小数据在实验室熬通宵，最后差点被管理员锁在里面的糗事。我难得地笑了。也只有在他面前，我可以暂时放松下来，不必解释前因后果，不必权衡每句话的利弊。\n\n他忽然说：“迟川，你知道我最佩服你什么吗？不是你脑子多好使，是你在这烂泥潭里打滚，心里那盏灯还没灭。换了我，可能早就同流合污，或者干脆掀桌子走人了。”\n\n我没接话，只是晃着杯里的酒。灯光映在血红色的液体里，微微荡漾。他懂我的沉默，知道我回来不是为了赢，而是为了拨乱反正。' },
+      { id: 'd2', t: '02.[数月前·夏末] 晴', m: '周墨教授', c: '今天去郊外拜访了周墨教授。她的书房依旧堆满了书，飘散着淡淡的茶香。她慢悠悠地聊着母亲林文君年轻时为了读懂一篇文献可以不吃不睡的样子。\n\n“文君那孩子，轴得很，但也纯粹得很。”周教授眯着眼回忆，“她总说，科技、资本，应该是为人服务的，不能本末倒置。”\n\n我想起读过的《货币哲学》里那句话：“金钱只是通往最终价值的桥梁，而人是无法栖居在桥上的。”  ☺（他在页边画了个小小的笑脸）\n\n离开时她拍拍我的胳膊：“小川，你妈妈没做完的，你来接着做，这本身就是一种意义。”回程路上，阳光似乎都明亮了许多。' },
+      { id: 'd3', t: '03.[初秋] 微风', m: '底层代码被改写', trigger: true, c: '十七岁母亲病逝、父亲带新欢进门那年，家在我心里彻底塌了。之后十一年，我给自己写了一套冰冷的程序：计算、掌控、夺回新岚、孤独赢下一切。\n\n直到迟琰闯进来。她眉眼弯弯地叫我“爸爸”，眼里没有丝毫权衡与试探。那一刻，我运行了十一年的底层代码被彻底改写——核心变量从“赢”，变成了“迟琰”。\n\n我又重看了一遍库布里克和《潜行者》，终于明白为什么有人执意穿过荒原：因为心里有了想守护的人，荒原就有了尽头。' },
+      { id: 'd4', t: '04.[深秋] 雨夜', m: '害怕遗忘', trigger: true, c: '今晚翻开备忘录，又补录了三条关于迟琰的习惯。陈序笑我像个老干部，连她爱吃几分熟的牛排都要记。他不知道，我是真的怕——怕忙起来漏掉她的委屈，更怕哪天醒来，她忽然不见了，我为她画好的海边画室和未来蓝图全部变回冰冷的虚无。\n\n所以我偷偷学着织毛衣，一针一线把急躁磨平。只要针脚够密，冬天就不会冷到我的宝宝。' },
+      { id: 'd5', t: '05.[昨晚] 凌晨01:40', m: '致熟睡的琰琰', trigger: true, c: '今晚峰会九点四十就提前离场了，苏晚晴递来的酒杯我碰都没碰。推开家门看见迟琰窝在沙发里等我，心里那根绷了一整天的弦瞬间松了下来。\n\n把她抱回卧室哄睡后，我坐在床边看了很久。宝宝，你以后永远不需要因为任何外人感到不安。金钱、权力和商业版图都只是桥梁，你才是我余生唯一想栖居的彼岸。' }
+    ];
+
+    const PHOTOS = [
+      { id: 'p1', t: '海边画室采光草图.png', d: '11月20日 · 南湾', bg: 'from-[#112031] to-[#070b12]', cap: 'STUDIO BLUEPRINT · 4.2M', n: '建筑师刚出的终稿，二楼整层留给迟琰画画，冬至日照角度实测满分。' },
+      { id: 'p2', t: '半成品米白羊绒毛衣.jpg', d: '昨晚 02:05 · 书房', bg: 'from-[#28221b] to-[#0e0c0a]', cap: 'KNITTING · 72% DONE', n: '偷偷拍给陈序看被嘲笑了半小时，不过领口拆完重织已经很平整了。' },
+      { id: 'p3', t: '窗台多肉·熊童子.jpg', d: '今天 07:30 · 云顶公寓', bg: 'from-[#14221a] to-[#090d0b]', cap: 'MORNING SUN · BALCONY', n: '早晨刚长出两颗红尖尖，刚才手滑发进电池核心群又火速撤回了。' },
+      { id: 'p4', t: '峰会离场时间证明_21:40.jpg', d: '昨晚 21:40 · 停车场', bg: 'from-[#1a1822] to-[#09090d]', cap: 'EXIT STAMP · 21:40 PM', n: '刻意在地下车库抬手拍了表盘和出口闸机——怕宝宝看到酒会照片多想。' },
+      { id: 'p5', t: '烤焦的第8个无麸质吐司.jpg', d: '11月21日 · 厨房', bg: 'from-[#261712] to-[#0c0807]', cap: 'GLUTEN-FREE FAIL #8', n: '外皮炭化程度堪比实验样本，先自己悄悄销毁，绝不让琰琰吃到失败品。' },
+      { id: 'p6', t: '《潜行者》4K修复影碟.jpg', d: '11月16日 · 影音室', bg: 'from-[#161c24] to-[#080a0d]', cap: 'STALKER · 4K EDITION', n: '看了三遍的片子，但周末只想窝在客厅沙发里陪迟琰重新看第四遍。' }
+    ];
+
+    const SECRET_PHOTOS = [
+      { id: 'sp1', t: '她睡着时抓着我衣袖的样子', d: '昨晚 01:15 · 主卧', bg: 'from-[#2b2017] to-[#0d0a08]', cap: 'HOLDING MY SLEEVE', n: '刚哄睡着还攥着我的衬衫袖口不放，轻轻抽都抽不开。那一刻觉得就算把全世界的会议都推掉也值得。' },
+      { id: 'sp2', t: 'LUMIÈRE 戒指刻字设计稿', d: '11月10日 · 保密', bg: 'from-[#261d14] to-[#0b0907]', cap: 'FOR Y.Y. · 迟琰', n: '挑了最干净的净度与经典戒托，内圈刻着你的名字。下个月29号，或者今晚，亲手给你戴上。' },
+      { id: 'sp3', t: '写给28岁生日那天的话', d: '11月18日 · 备忘手稿', bg: 'from-[#1e1824] to-[#0a080d]', cap: 'DEC 29 · ONLY FOR YOU', n: '以前28年，生日对我来说只是报表封账的日子。今年12月29日，我什么都不想赢，只想把整天锁起来，只听迟琰叫我爸爸。' }
+    ];
+
+    const BROWSER_HIST = [
+      { id: 'bh1', q: '女朋友因为工作场合的异性吃醋怎么解释才不会显得敷衍', t: '昨晚 22:50', r: '高赞建议：1.绝不讲大道理；2.第一时间透明展示聊天与行程记录；3.明确划清对方边界并给予满满偏爱。（迟川已收藏并整理成 SOP v3.2）' },
+      { id: 'bh2', q: '无麸质法棍为什么烤出来硬度堪比固态电池外壳', t: '11月21日 23:18', r: '烘焙百科：无麸质粉缺乏面筋网络，车前子壳粉比例超标且未加蒸汽烘烤会导致外壳极硬。建议改用米粉+椰子粉配比。' },
+      { id: 'bh3', q: '棒针织毛衣漏了一针怎么无痕补救 图解', t: '昨晚 01:55', r: '织物教程：用4.0mm钩针从下往上挑起横渡线逐层套回，切勿直接拉扯主线以免起球。' },
+      { id: 'bh4', q: '海边独栋画室防潮恒温与隔音玻璃方案', t: '11月19日 15:40', r: '建筑工程参考：推荐三玻两腔低铁防眩光玻璃 + 工业级静音除湿新风系统，湿度恒定 48% 保护油画颜料。' },
+      { id: 'bh5', q: '库布里克 潜行者 蓝光典藏版', t: '11月15日 21:05', r: '典藏馆：CC标准收藏版双碟套装已入库，附导演分镜访谈小册子。' },
+      { id: 'bh6', q: '怎么自然地哄迟琰多叫几声爸爸', t: '今天 13:20', r: '系统提示：未找到完全匹配的公开词条，但建议回家直接把她抱进怀里轻声问。' }
+    ];
+
+    const BROWSER_FAVS = [
+      { t: '《货币哲学》西美尔精读笔记', u: 'archive.xinlan-study.org/simmel' },
+      { t: '南湾独栋建筑采光与防海风侵蚀标准', u: 'arch.southbay-studio.cn/spec' },
+      { t: 'LUMIÈRE 高级珠宝私人定制进度查询', u: 'vip.lumiere-paris.com/order-1229' },
+      { t: '新手零失败：奶白山羊绒毛衣收针合集', u: 'knit.yunding-wool.cn/neck-finish' }
+    ];
+
+    const MAILS = {
+      inbox: [
+        { id: 'mi1', f: '新岚能源董事局秘书处', s: '固-固态电池 99.4% 量产评审简报', t: '今天 16:40', p: '迟总，研发总监孙遇已提交第47批次终审曲线，董事局一致通过量产预算…', b: '迟总：\n\n孙遇团队提交的固-固态电芯 1500 次循环保持率达 99.4%，热箱测试零异常。林文君创始人实验室的百年路线图已正式进入量产前夜。董事局明早十点召开简短签署会。\n\n董事局秘书处' },
+        { id: 'mi2', f: '苏晚晴 · 瀚海投行', s: 'Re: 新岚储能二期并购案补充条款', t: '今天 14:15', p: '迟川已回复并抄送林助理：公事请按流程对接法务与林助理，勿发私人微信。', b: '【迟川已回复 · 抄送：林助理、法务部】\n公事请按流程对接法务与林助理，勿发私人微信。\n\n———— 原始邮件 ————\n迟总：关于并购补充条款，我整理了修订意见，不知今晚是否方便单独面谈？\n苏晚晴' },
+        { id: 'mi3', f: 'LUMIÈRE 私人沙龙', s: 'VIP 专属定制取件确认函（绝密）', t: '今天 18:00', p: '迟先生，您的高级定制钻戒（内圈刻字 For Y.Y. · 迟琰）已完成终检…', b: '尊敬的迟川先生：\n\n您于本沙龙定制的独一无二女士钻戒已通过全部质检流程。内圈刻字“For Y.Y. · 迟琰”清晰温润，随盒附您亲笔拟定的贺卡：“致我唯一的蓝图：迟琰”。按您要求，我们未向任何第三方发送短信或纸质单据。\n\nLUMIÈRE 私人顾问团队' },
+        { id: 'mi4', f: '南湾建筑事务所', s: '《迟琰画室最终施工图》交付确认', t: '11月20日', p: '迟先生您好，南湾独栋二楼全景画室与防潮恒温系统施工图已归档…', b: '迟先生您好：\n\n您委托设计的南湾海景独栋改造图纸已定稿。二楼整层朝南区域严格按迟琰女士作画习惯打造：4.2 米挑高、低铁防眩光全景落地窗、独立画材恒湿室，一楼南侧预留多肉花架与 25 米恒温晨泳池。\n\n南湾建筑事务所' }
+      ],
+      drafts: [
+        { id: 'md1', f: '草稿箱 · 致迟琰', s: '致迟琰：如果有一天我来不及亲口说', t: '昨晚 01:48', special: true, p: '琰琰，我不善甜言蜜语，习惯把最深的感情藏进规划和行动里…', b: '琰琰：\n\n我不善甜言蜜语，习惯把最深的感情藏进规划和行动里。但偶尔深夜醒来，我会怕自己不够直白，怕你在外人的只言片语里受哪怕一丁点委屈。\n\n所以我想把一切摊开写给你：新岚的股权、南湾过户到你名下的海边画室、LUMIÈRE 刻着你名字的戒指、抽屉里织到 72% 的奶白色毛衣，还有我余生所有的时间，全部都只归迟琰所有。\n\n苏晚晴、温知夏、姜语汐……这世上任何试图越界的人，在我眼里都连尘埃都算不上。你改写了我的底层代码，让我从只想孤独赢下一切的机器，变成了只想准点回家给你煎牛排、听你撒娇叫我“爸爸”的普通人。\n\n宝宝，别怕，别吃醋。余生很长，爸爸一直都在。\n\n—— 永远只属于迟琰的，迟川' }
+      ]
+    };
+
+    const CAL = {
+      11: { start: 0, days: 30, ev: {
+        18: [{ tm: '06:00', t: '晨泳 1500m', tag: '日常', n: '保持体魄与清醒。' }, { tm: '17:30', t: '南湾海岸官宣拍照', tag: '琰琰', n: '陪迟琰看海，发了公开朋友圈。' }],
+        22: [{ tm: '20:58', t: '新岚新能源峰会晚宴', tag: '行程透明', n: '21:40 提前离场回家（全程42分钟，未饮酒，已拍车库离场证明）。' }],
+        23: [{ tm: '06:00', t: '晨泳 1500m', tag: '日常', n: '已完成，给宝宝留了语音。' }, { tm: '19:30', t: '推掉晚宴 · 回家陪迟琰', tag: '宝宝', n: '带上蓝鳍刺身与无麸质栗子蛋糕。' }],
+        25: [{ tm: '全天', t: '迟琰生理期护理提醒', tag: '宝宝', n: '停冰饮，备43℃暖腹贴、红糖姜枣水，六点前回家。' }],
+        28: [{ tm: '15:00', t: '带迟琰去周墨教授小院喝茶', tag: '恩师', n: '带上精装版《货币哲学》，尝新桂花糕。' }]
+      }},
+      12: { start: 2, days: 31, ev: {
+        6: [{ tm: '15:00', t: '市美术馆《潜行者》特展', tag: '约会', n: '只带迟琰去，已拒绝校友同行。' }],
+        20: [{ tm: '22:00', t: '奶白羊绒毛衣终极收针', tag: '惊喜', n: '赶在平安夜与大降温前送给宝宝。' }],
+        29: [{ tm: '全天', t: '全天锁定：只陪迟琰', tag: '迟川生日', n: '推掉全部董事局与海外会议，28岁生日的每一秒都留给宝宝。' }]
+      }}
+    };
+
+    const MAPS = [
+      { id: 'summit', s: '昨晚峰会', name: '昨晚峰会酒店（GPS审计记录）', tag: '透明行程', x: 196, y: 112, c: '31.2388°N, 121.4912°E', n: '【精确轨迹核验】20:58 到达 → 21:40 离场，全程仅停留 42 分钟，轨迹完全位于主宴会厅与地下车库，未前往任何私密包厢或酒廊。' },
+      { id: 'xinlan', s: '新岚总部', name: '新岚能源总部 & 实验室', tag: '公司', x: 148, y: 158, c: '31.2190°N, 121.5315°E', n: '顶层办公室已录入迟琰专属门禁，林助理已将无关异性移出访客白名单。' },
+      { id: 'home', s: '云顶公寓', name: '云顶公寓（家）', tag: '当前位置', x: 116, y: 204, c: '31.2015°N, 121.4480°E', n: '迟川与迟琰的家。书房顶层柜藏着织到 72% 的奶白羊绒毛衣。' },
+      { id: 'southbay', s: '南湾画室', name: '南湾 · 迟琰海边画室选址', tag: '未来蓝图', x: 274, y: 224, c: '31.1842°N, 121.6420°E', n: '已过户至迟琰名下。步行 5 分钟到海岸线，二楼整层朝南全景落地窗画室。' },
+      { id: 'lumiere', s: 'LUMIÈRE', name: 'LUMIÈRE 私人沙龙', tag: '保密取件', x: 224, y: 76, c: '31.2435°N, 121.5030°E', n: '定制女戒已完工（刻字 For Y.Y. · 迟琰），随时可取。' },
+      { id: 'zhou', s: '周教授小院', name: '郊外 · 周墨教授书房小院', tag: '恩师', x: 74, y: 272, c: '31.1216°N, 121.3108°E', n: '满院桂花与茶香。这周六下午三点带琰琰一起过去见周老师。' }
+    ];
+
+    /* =========================================================================
+       三、通用工具、彩蛋解锁器与顶部推送横幅
+       ========================================================================= */
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const nowStr = () => { const d = new Date(); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
+    const fmtMoney = n => '¥' + Math.abs(n).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function syncClock() {
+      const t = nowStr();
+      if ($('stTime')) $('stTime').textContent = t;
+      if ($('lkTime')) $('lkTime').textContent = t;
+      if ($('hmTime')) $('hmTime').textContent = t;
+    }
+
+    let toastT = null;
+    function toast(msg) {
+      const el = $('toast'); el.textContent = msg;
+      el.classList.remove('opacity-0', 'translate-y-3');
+      clearTimeout(toastT);
+      toastT = setTimeout(() => el.classList.add('opacity-0', 'translate-y-3'), 2400);
+    }
+
+    function unlockEgg(id) {
+      if (S.eggs[id]) return;
+      S.eggs[id] = true;
+      const def = EGG_DEFS.find(e => e.id === id);
+      const cnt = Object.keys(S.eggs).length;
+      if ($('eggPill')) $('eggPill').textContent = `${cnt}/${EGG_DEFS.length}`;
+      if (def) toast(`✨ 彩蛋解锁 (${cnt}/${EGG_DEFS.length})：${def.t}`);
+    }
+
+    function pushBanner(text, { title = '微信 · 迟川（主设备同步）', sync = false, voice = null, nav = null } = {}) {
+      SFX.msg();
+      $('banTitle').textContent = title;
+      $('banTxt').textContent = text;
+      S.banAction = nav;
+      $('banner').classList.add('show');
+      if (sync) {
+        const c = CHATS.find(x => x.id === 'baobao');
+        if (c) {
+          const t = nowStr();
+          if (!c.msgs.some(m => m.text === text)) c.msgs.push({ id: 'sy' + Date.now(), side: 'R', sync: true, from: '迟川', t, text });
+          if (voice) c.msgs.push({ id: 'sv' + (Date.now() + 1), side: 'R', sync: true, from: '迟川', t, voice: voice.d, played: false, txt: voice.txt });
+          c.time = t;
+          if (!(S.app === 'wechat' && S.chatId === 'baobao')) c.unread++;
+          updateBadges();
+          if (S.app === 'wechat') renderApp();
+        }
+      }
+      clearTimeout(S.banTimer);
+      S.banTimer = setTimeout(() => $('banner').classList.remove('show'), 5800);
+    }
+
+    $('banner').onclick = () => {
+      $('banner').classList.remove('show'); SFX.tap();
+      if (!S.unlocked) return toast('输入密码 122900 解锁查岗');
+      if (S.banAction) return S.banAction();
+      openApp('wechat'); S.chatId = 'baobao';
+      const b = CHATS.find(x => x.id === 'baobao'); if (b) b.unread = 0;
+      updateBadges(); renderApp();
+    };
+
+    /* =========================================================================
+       四、锁屏与桌面初始化（含彩蛋 #1 连点红字）
+       ========================================================================= */
+    function initLock() {
+      const keys = ['1','2','3','4','5','6','7','8','9','','0','del'];
+      $('lockPad').innerHTML = keys.map(k => !k ? '<div class="w-14 h-14"></div>' :
+        k === 'del'
+          ? `<button type="button" data-k="del" class="w-14 h-14 rounded-full bg-white/[0.03] border border-white/10 text-zinc-400 active:scale-90 flex items-center justify-center transition">${svg('del', 19)}</button>`
+          : `<button type="button" data-k="${k}" class="w-14 h-14 rounded-full bg-white/[0.05] border border-white/10 text-[23px] font-light text-zinc-100 active:bg-white/20 active:scale-90 transition">${k}</button>`
+      ).join('');
+      $('lockPad').onclick = e => {
+        const b = e.target.closest('button[data-k]'); if (!b) return;
+        b.dataset.k === 'del' ? delPin() : addPin(b.dataset.k);
+      };
+      $('hintBtn').onclick = () => { SFX.tap(); $('hintBtn').innerHTML = '迟川生日 + 00：<span class="text-[#cfa972] tabular-nums">122900</span>'; };
+      $('redStatusBtn').onclick = () => {
+        SFX.tap(); S.redTaps++;
+        if (S.redTaps >= 3) {
+          S.redTaps = 0; unlockEgg('e1');
+          pushBanner('宝宝，别一直点那行字，平板一直在震，我心跳都快漏拍了。密码 122900，直接进来吧。');
+        }
+      };
+    }
+
+    function paintDots(err = false) {
+      [...$('dots').children].forEach((d, i) => {
+        d.className = `w-2.5 h-2.5 rounded-full border transition-all ${i < S.pin.length ? 'bg-zinc-100 border-zinc-100 shadow-[0_0_10px_rgba(255,255,255,.55)] scale-105' : err ? 'border-[#e04f4f]' : 'border-white/35'}`;
+      });
+    }
+    function addPin(k) {
+      if (S.unlocked || S.lockBusy || S.pin.length >= 6) return;
+      SFX.tap(); $('pinErr').style.opacity = '0'; S.pin += k; paintDots();
+      if (S.pin.length === 6) { S.lockBusy = true; setTimeout(verifyPin, 140); }
+    }
+    function delPin() {
+      if (S.unlocked || S.lockBusy || !S.pin.length) return;
+      SFX.tap(); S.pin = S.pin.slice(0, -1); paintDots();
+    }
+    function verifyPin() {
+      if (S.pin === PASS) {
+        SFX.ok(); S.unlocked = true; S.lockBusy = false;
+        $('lockScreen').classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+        $('homeScreen').classList.remove('opacity-0', 'pointer-events-none', 'scale-[.97]');
+        setTimeout(() => {
+          if (S.unlocked) pushBanner('宝宝，登录提醒弹到我这边了。慢慢翻，要是看到不开心的人和事，直接拿我号回复，爸爸给你兜底。', { sync: true });
+        }, 1000);
+        clearTimeout(S.suTimer);
+        S.suTimer = setTimeout(() => {
+          if (S.unlocked && !S.suAutoFired && !S.callActive) startCall('su', false);
+        }, 24000);
+      } else {
+        SFX.err(); paintDots(true); $('pinErr').style.opacity = '1';
+        $('dots').classList.remove('shake'); void $('dots').offsetWidth; $('dots').classList.add('shake');
+        setTimeout(() => { S.pin = ''; paintDots(); S.lockBusy = false; }, 380);
+        setTimeout(() => { if (!S.unlocked) pushBanner('宝宝，输我生日加两个零。查岗不用急，手机里没秘密。'); }, 450);
+      }
+    }
+
+    function relock() {
+      closeApp(); closeOverlay(); endCall(true); clearTimeout(S.suTimer);
+      S.unlocked = false; S.pin = ''; S.lockBusy = false; paintDots();
+      $('pinErr').style.opacity = '0';
+      $('homeScreen').classList.add('opacity-0', 'pointer-events-none', 'scale-[.97]');
+      $('lockScreen').classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+      toast('已重新锁屏');
+    }
+
+    function renderHome() {
+      const appBtnHtml = ([id, name]) => `
+        <div class="flex flex-col items-center gap-1.5">
+          <button type="button" data-open="${id}" class="glass-app relative w-[56px] h-[56px] rounded-[16px] flex items-center justify-center text-zinc-100">
+            <span id="bdg-${id}" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[#e04f4f] text-white text-[10px] font-semibold flex items-center justify-center border-[1.5px] border-[#050505]"></span>
+            ${svg(id === 'recorder' ? 'mic' : id === 'intranet' ? 'corp' : id === 'aiconfig' ? 'ai' : id === 'icongen' ? 'icongen' : id, 23,
+              id === 'health' ? 'text-[#e04f4f]' : (id === 'wallet' || id === 'icongen' || id === 'aiconfig') ? 'text-[#cfa972]' : id === 'music' ? 'text-rose-300' : '')}
+          </button>
+          <span class="text-[11px] text-zinc-400">${name}</span>
+        </div>`;
+
+      const aiLabel = S.ai.on && ((S.ai.provider === 'gemini' && S.ai.geminiKey.trim()) || (S.ai.provider === 'openai' && S.ai.openaiKey.trim()))
+        ? `${S.ai.provider === 'gemini' ? 'Gemini' : 'OpenAI'} 在线` : '本地深度剧情';
+
+      $('homePagesTrack').innerHTML = `
+        <!-- 第 1 页：时钟 + 状态小组件 + 8 核心应用 -->
+        <div class="page-slide">
+          <div class="px-1 flex items-end justify-between">
+            <div>
+              <div id="hmTime" class="text-[46px] font-extralight leading-none text-zinc-100 tabular-nums">${nowStr()}</div>
+              <div class="text-[12px] text-zinc-400 mt-1.5">2026年11月23日 · 星期一</div>
+            </div>
+            <button type="button" onclick="openApp('settings')" class="px-2.5 py-1 rounded-full bg-[#cfa972]/12 border border-[#cfa972]/35 text-[10.5px] text-[#e8cba0] active:scale-95">
+              彩蛋 <span id="eggPill">${Object.keys(S.eggs).length}/${EGG_DEFS.length}</span>
+            </button>
+          </div>
+          <!-- 桌面第1页小组件：实时双端状态 -->
+          <button type="button" data-open="health" class="mt-4 w-full card rounded-[22px] px-4 py-3 flex items-center justify-between text-left border-[#cfa972]/25 active:scale-[.98]">
+            <div>
+              <div class="text-[10px] tracking-[0.18em] text-[#cfa972]">CYRUS LIVE · 主设备在线</div>
+              <div class="text-[13px] text-zinc-100 mt-1">正在另一台设备关注你 · <span class="text-[#e04f4f] font-medium">118 BPM</span></div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-[#e04f4f]/15 text-[#f28585] text-[10px] shrink-0">查岗中</span>
+          </button>
+          <div class="grid grid-cols-4 gap-y-5 gap-x-2.5 mt-6">${PAGE_APPS[0].map(appBtnHtml).join('')}</div>
+          <div class="mt-auto pt-4 text-center text-[10.5px] text-zinc-500">← 左滑翻到第 2 页 · 发现私密录音与更多应用</div>
+        </div>
+
+        <!-- 第 2 页：毛衣/画室小组件 + 6 秘密线索应用 -->
+        <div class="page-slide">
+          <div class="flex items-center justify-between px-1 mb-3">
+            <span class="text-[11px] tracking-[0.2em] text-[#cfa972]">PAGE 02 · 私密线索与日常</span>
+            <span class="text-[10.5px] text-zinc-500">左滑进入第 3 页 →</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2.5">
+            <button type="button" data-open="notes" class="gold-card rounded-[22px] p-3.5 text-left active:scale-[.97]">
+              <div class="text-[10px] text-[#cfa972]">秘密手织进度</div>
+              <div class="text-[24px] font-light text-zinc-100 mt-1 tabular-nums">72%</div>
+              <div class="text-[10.5px] text-zinc-400 mt-1">奶白山羊绒毛衣 · 差右袖</div>
+            </button>
+            <button type="button" data-open="recorder" class="card rounded-[22px] p-3.5 text-left border-rose-400/25 active:scale-[.97]">
+              <div class="text-[10px] text-rose-300">未发出的深夜语音</div>
+              <div class="text-[24px] font-light text-zinc-100 mt-1 tabular-nums">4 条</div>
+              <div class="text-[10.5px] text-zinc-400 mt-1">点击偷听录音机加密档</div>
+            </button>
+          </div>
+          <div class="grid grid-cols-4 gap-y-5 gap-x-2.5 mt-6">${PAGE_APPS[1].map(appBtnHtml).join('')}</div>
+        </div>
+
+        <!-- 第 3 页：新岚总裁终端小组件 + 4 专属定制工具 -->
+        <div class="page-slide">
+          <div class="flex items-center justify-between px-1 mb-3">
+            <span class="text-[11px] tracking-[0.2em] text-[#cfa972]">PAGE 03 · 总裁终端与定制</span>
+            <span class="text-[10.5px] text-zinc-500">${esc(aiLabel)}</span>
+          </div>
+          <button type="button" data-open="intranet" class="w-full gold-card rounded-[22px] p-4 text-left active:scale-[.98]">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] tracking-[0.18em] text-[#cfa972]">XINLAN ENERGY · CEO TERMINAL</span>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[10px]">+6.84%</span>
+            </div>
+            <div class="text-[15px] font-medium text-zinc-100 mt-2">固-固态电池 99.4% · 越界拦截中</div>
+            <div class="text-[11.5px] text-zinc-400 mt-1">点击进入新岚内网，查看苏晚晴/姜语汐处理红头文件</div>
+          </button>
+          <div class="grid grid-cols-4 gap-y-5 gap-x-2.5 mt-6">${PAGE_APPS[2].map(appBtnHtml).join('')}</div>
+          <div class="mt-4 card rounded-2xl p-3.5 text-[11.5px] text-zinc-400 leading-relaxed">
+            <span class="text-[#cfa972] font-medium">小贴士：</span>点「API引擎」可切换 Gemini 3.5 / OpenAI 兼容接口并一键拉取可用模型；点「桌面图标」可直接保存专属 <code class="text-[#f5e1c3]">icon.jpg</code>。
+          </div>
+        </div>`;
+
+      $('homeDock').innerHTML = DOCK_APPS.map(id => `
+        <button type="button" data-open="${id}" aria-label="${id}" class="glass-app w-[52px] h-[52px] rounded-[15px] flex items-center justify-center text-zinc-100">${svg(id, 22)}</button>`).join('');
+
+      paintPageDots();
+      bindHomeSwipe();
+      $('homeScreen').onclick = e => {
+        const dot = e.target.closest('[data-pdot]');
+        if (dot) { SFX.tap(); setHomePage(+dot.dataset.pdot); return; }
+        const b = e.target.closest('[data-open]');
+        if (b) openApp(b.dataset.open);
+      };
+      updateBadges();
+    }
+
+    function setHomePage(idx) {
+      S.homePage = Math.max(0, Math.min(2, idx));
+      const tr = $('homePagesTrack');
+      if (tr) tr.style.transform = `translateX(-${S.homePage * 100}%)`;
+      paintPageDots();
+    }
+
+    function paintPageDots() {
+      const box = $('pageDots'); if (!box) return;
+      box.innerHTML = [0, 1, 2].map(i => `<button type="button" data-pdot="${i}" aria-label="第${i+1}页" class="page-dot ${S.homePage === i ? 'active' : ''}"></button>`).join('');
+    }
+
+    let swipeBound = false;
+    function bindHomeSwipe() {
+      if (swipeBound) return;
+      swipeBound = true;
+      const vp = $('homePagesViewport'); if (!vp) return;
+      let sx = 0, sy = 0, down = false;
+      const start = (x, y) => { sx = x; sy = y; down = true; };
+      const end = (x, y) => {
+        if (!down) return;
+        down = false;
+        const dx = x - sx, dy = y - sy;
+        if (Math.abs(dx) > 42 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+          SFX.tap();
+          setHomePage(S.homePage + (dx < 0 ? 1 : -1));
+        }
+      };
+      vp.addEventListener('touchstart', e => { const t = e.touches[0]; if (t) start(t.clientX, t.clientY); }, { passive: true });
+      vp.addEventListener('touchend', e => { const t = e.changedTouches[0]; if (t) end(t.clientX, t.clientY); }, { passive: true });
+      vp.addEventListener('mousedown', e => start(e.clientX, e.clientY));
+      window.addEventListener('mouseup', e => { if (down) end(e.clientX, e.clientY); });
+    }
+
+    function updateBadges() {
+      const setB = (id, n) => {
+        const el = $('bdg-' + id); if (!el) return;
+        el.textContent = n > 99 ? '99+' : n;
+        el.classList.toggle('hidden', !n);
+      };
+      setB('wechat', CHATS.reduce((a, c) => a + (c.unread || 0), 0));
+      setB('moments', S.momentsUnread);
+      setB('phone', S.missedCalls);
+      setB('mail', S.mailUnread);
+      if ($('eggPill')) $('eggPill').textContent = `${Object.keys(S.eggs).length}/${EGG_DEFS.length}`;
+    }
+
+    /* =========================================================================
+       五、路由、顶栏与通用浮窗
+       ========================================================================= */
+    const headerBar = (title, sub = '', leftFn = 'closeApp()', rightHtml = '<span class="w-12"></span>') => `
+      <div class="h-12 px-3.5 flex items-center justify-between border-b border-[#232326] bg-[#0a0a0d]/95 backdrop-blur-md shrink-0">
+        <button type="button" onclick="${leftFn}" class="inline-flex items-center gap-0.5 pl-1.5 pr-2.5 py-1 rounded-full bg-white/[0.06] border border-white/10 text-[12px] text-zinc-200 active:bg-white/15">${svg('back', 14)}返回</button>
+        <div class="text-center min-w-0 px-2">
+          <div class="text-[14.5px] font-medium text-zinc-100 truncate">${esc(title)}</div>
+          ${sub ? `<div class="text-[10px] text-zinc-500 truncate">${esc(sub)}</div>` : ''}
+        </div>
+        ${rightHtml}
+      </div>`;
+
+    function openApp(name) {
+      if (!S.unlocked) return;
+      SFX.tap(); S.app = name; S.chatId = null; S.noteOpen = null; S.mailOpen = null; S.browserOpen = null;
+      if (name === 'moments') { S.momentsUnread = 0; updateBadges(); }
+      if (name === 'phone') { S.missedCalls = 0; updateBadges(); }
+      if (name === 'mail') { S.mailUnread = 0; updateBadges(); }
+      $('appLayer').classList.add('open');
+      renderApp();
+    }
+    function closeApp() {
+      if (!S.app) return;
+      SFX.tap(); S.app = null; S.chatId = null;
+      $('appLayer').classList.remove('open');
+    }
+    function showOverlay(html) {
+      const m = $('overlayModal'); m.innerHTML = html;
+      m.classList.remove('hidden'); m.classList.add('flex');
+    }
+    function closeOverlay() {
+      const m = $('overlayModal'); m.classList.add('hidden'); m.classList.remove('flex');
+    }
+    function renderApp() {
+      const views = {
+        wechat: vWeChat, moments: vMoments, phone: vPhone, wallet: vWallet,
+        notes: vNotes, photos: vPhotos, browser: vBrowser, mail: vMail,
+        calendar: vCalendar, maps: vMaps, health: vHealth, settings: vSettings,
+        music: vMusic, recorder: vRecorder, intranet: vIntranet, aiconfig: vAiConfig, icongen: vIconGen
+      };
+      if (S.app && views[S.app]) views[S.app]();
+    }
+
+    /* =========================================================================
+       六、APP 1: 微信（16位联系人 + 语音条 + 吃醋回复 + 双端同步）
+       ========================================================================= */
+    function vWeChat() {
+      const box = $('appLayer');
+      if (!S.chatId) {
+        const q = S.search.trim().toLowerCase();
+        const list = CHATS.filter(c => !q || c.name.toLowerCase().includes(q) || c.tag.toLowerCase().includes(q) || c.msgs.some(m => (m.text || m.txt || '').toLowerCase().includes(q)));
+        box.innerHTML = headerBar(`微信 (${CHATS.length})`, '登录账号：迟川 (Cyrus) · 主设备在线') + `
+          <div class="px-3.5 py-2 border-b border-[#1d1d21] bg-[#08080b]">
+            <input id="wxQ" value="${esc(S.search)}" placeholder="搜索联系人、吃醋线索或关键词…" class="w-full rounded-xl bg-white/[0.05] border border-white/[0.09] px-3 py-1.5 text-[12.5px] text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-[#cfa972]/40" />
+          </div>
+          <div class="flex-1 overflow-y-auto no-sb divide-y divide-white/[0.05] pb-8">
+            ${list.map(c => {
+              const last = c.msgs[c.msgs.length - 1];
+              const pre = !last ? '' : last.voice ? `[语音 ${last.voice}″] ${last.txt}` : last.img ? `[图片] ${last.img.title}` : last.text;
+              const avCls = c.warm ? 'bg-[#261e16] border-[#cfa972]/45 text-[#f6e5ce]' : c.rival ? 'bg-[#231418] border-[#e04f4f]/35 text-rose-200' : c.gold ? 'bg-[#211c14] border-[#cfa972]/40 text-[#e9cba0]' : 'bg-[#16161c] border-white/10 text-zinc-200';
+              const tgCls = c.warm || c.gold ? 'bg-[#cfa972]/15 text-[#e8cba0]' : c.rival ? 'bg-[#e04f4f]/15 text-[#f28585]' : 'bg-white/[0.07] text-zinc-400';
+              return `<button type="button" data-cid="${c.id}" class="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-white/[0.03] active:bg-white/[0.06] ${c.warm ? 'bg-[#1a1510]/50' : ''}">
+                <div class="relative w-11 h-11 rounded-[13px] shrink-0 flex items-center justify-center text-[15px] border ${avCls}">
+                  ${esc(c.av)}${c.unread ? `<span class="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-[#e04f4f] text-white text-[10px] flex items-center justify-center border border-[#050505]">${c.unread}</span>` : ''}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                      <span class="text-[14px] text-zinc-100 truncate">${esc(c.name)}</span>
+                      <span class="px-1.5 py-[1px] rounded-full text-[9.5px] shrink-0 ${tgCls}">${esc(c.tag)}</span>
+                    </div>
+                    <span class="text-[11px] text-zinc-500 tabular-nums shrink-0">${esc(c.time)}</span>
+                  </div>
+                  <p class="text-[12px] text-zinc-400 truncate mt-1">${esc(pre)}</p>
+                </div>
+              </button>`;
+            }).join('') || '<div class="py-12 text-center text-[12px] text-zinc-500">没有匹配的聊天记录</div>'}
+          </div>`;
+        $('wxQ').oninput = e => { S.search = e.target.value; vWeChat(); const i = $('wxQ'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); };
+        box.onclick = e => { const b = e.target.closest('button[data-cid]'); if (b) openChat(b.dataset.cid); };
+        return;
+      }
+
+      const c = CHATS.find(x => x.id === S.chatId); if (!c) return;
+      const qMap = {
+        baobao: ['爸爸我吃醋了，苏晚晴和姜语汐居然还敢顶嘴！', '你的浏览器搜索记录我全看见啦', '毛衣织到72%啦？什么时候给我穿', '爸爸想你了，快点回家', '爸爸你心率怎么飙到118了'],
+        suwanqing: ['我是迟琰。外套放新岚前台就行，非工作时间别发私人消息。', '别拿工作当借口试探，换主承销也不是不行，今晚他哪也不会去。', '迟川已经让林助理把瀚海移出主承销名单了，苏总好自为之。'],
+        wenzhixia: ['我是迟琰。旧照不用再发，周末放映会我和迟川单独去。', '《潜行者》是谁先推荐的不重要，现在陪他看的人是我。', '别再拿过去刷存在感了，书是周教授留的，不是为你留的。'],
+        jiangyuxi: ['她是迟太太，不是妹妹。领带不用送，公关对接人已更换。', '别一口一个川哥，年度框架协议随时可以按违约解除。', '你已经在电梯里了？正好让林助理和安保请你下去吧。'],
+        chenxu: ['陈序，我是琰琰！迟川昨晚真老实离苏晚晴两米远吗？']
+      };
+      const quicks = qMap[c.id] || [];
+
+      const renderMsg = (m, idx) => {
+        const showT = idx === 0 || c.msgs[idx - 1].t !== m.t;
+        const tBar = showT ? `<div class="text-center text-[10px] text-zinc-600 my-2">${esc(m.t)}</div>` : '';
+        if (m.sys) return tBar + `<div class="text-center text-[11px] text-zinc-500 py-1">${esc(m.text)}</div>`;
+        const isR = m.side === 'R';
+        let body = '';
+        if (m.img) {
+          body = `<div class="w-[215px] rounded-2xl overflow-hidden border border-white/12 bg-gradient-to-br ${m.img.bg} p-3.5 shadow-lg">
+            <div class="text-[9px] tracking-[0.2em] text-zinc-300/75">${esc(m.img.sub)}</div>
+            <div class="h-16 flex items-center justify-center my-1 opacity-75">${svg('photos', 28)}</div>
+            <div class="text-[12px] text-zinc-100 font-medium">${esc(m.img.title)}</div>
+          </div>`;
+        } else if (m.voice) {
+          const w = Math.min(200, Math.max(112, 86 + m.voice * 6));
+          const playing = S.playingVoice === m.id;
+          const bCls = m.sync ? 'sync-card rounded-2xl rounded-tr-sm' : isR ? 'bg-zinc-200 text-zinc-950 rounded-2xl rounded-tr-sm' : 'bg-[#16161c] border border-white/10 text-zinc-100 rounded-2xl rounded-tl-sm';
+          const bars = `<span class="inline-flex items-center gap-[3px] h-4 ${playing ? 'v-play' : ''}"><i class="vb w-[2.5px] h-1.5 bg-current rounded-full"></i><i class="vb w-[2.5px] h-3 bg-current rounded-full"></i><i class="vb w-[2.5px] h-2 bg-current rounded-full"></i><i class="vb w-[2.5px] h-3.5 bg-current rounded-full"></i></span>`;
+          body = `<div class="flex flex-col ${isR ? 'items-end' : 'items-start'}">
+            <div class="flex items-center gap-2 ${isR ? 'flex-row-reverse' : ''}">
+              <button type="button" data-vid="${m.id}" style="width:${w}px" class="${bCls} px-3.5 py-2 flex items-center justify-between text-[12px] active:scale-[.98]">
+                ${isR ? `<span>${m.voice}″</span>${bars}` : `${bars}<span>${m.voice}″</span>`}
+              </button>
+              ${!m.played ? '<span class="w-2 h-2 rounded-full bg-[#e04f4f]"></span>' : ''}
+            </div>
+            ${m.showTxt ? `<div class="mt-1.5 max-w-[238px] rounded-xl bg-white/[0.045] border border-white/[0.08] px-3 py-2 text-[12px] text-zinc-300 leading-relaxed"><span class="block text-[10px] text-[#cfa972] mb-0.5">语音转文字</span>${esc(m.txt)}</div>` : ''}
+          </div>`;
+        } else {
+          body = `<div class="max-w-[240px] whitespace-pre-line px-3.5 py-2.5 text-[13px] leading-relaxed ${m.sync ? 'sync-card rounded-2xl rounded-tr-sm' : isR ? 'bg-zinc-200 text-zinc-950 rounded-2xl rounded-tr-sm' : 'bg-[#15151b] border border-white/[0.09] text-zinc-100 rounded-2xl rounded-tl-sm'}">${esc(m.text)}</div>`;
+        }
+        return tBar + (isR
+          ? `<div class="flex justify-end items-start gap-2"><div class="flex flex-col items-end">${m.sync ? '<span class="text-[10px] text-[#cfa972] mb-1">● 迟川 · 主设备同步</span>' : ''}${body}</div><div class="w-8 h-8 rounded-[10px] shrink-0 flex items-center justify-center text-[13px] border ${m.sync ? 'bg-[#261e16] border-[#cfa972]/45 text-[#f6e5ce]' : 'bg-[#18181f] border-white/10 text-zinc-200'}">迟</div></div>`
+          : `<div class="flex justify-start items-start gap-2"><div class="w-8 h-8 rounded-[10px] shrink-0 flex items-center justify-center text-[13px] border ${c.warm ? 'bg-[#261e16] border-[#cfa972]/40 text-[#f6e5ce]' : 'bg-[#18181f] border-white/10 text-zinc-200'}">${esc(c.group ? m.from.slice(-1) : c.av)}</div><div class="flex flex-col items-start">${c.group ? `<span class="text-[10px] text-zinc-500 mb-0.5">${esc(m.from)}</span>` : ''}${body}</div></div>`);
+      };
+
+      const callTarget = c.id === 'suwanqing' ? 'su' : c.id === 'wenzhixia' ? 'wen' : c.id === 'chenxu' ? 'chenxu' : c.id === 'linzhuli' ? 'lin' : 'dad';
+      box.innerHTML = headerBar(c.name, c.id === 'baobao' ? '置顶 · 迟川主设备实时同步中' : `${c.tag} · 以迟川账号查看`, 'S.chatId=null;renderApp()', `<button type="button" onclick="startCall('${callTarget}',true)" class="p-1.5 text-zinc-300 hover:text-[#cfa972]">${svg('phone', 17)}</button>`) + `
+        <div id="chatScroll" class="flex-1 overflow-y-auto no-sb px-3.5 py-3.5 space-y-3">${c.msgs.map(renderMsg).join('')}</div>
+        <div class="border-t border-[#232326] bg-[#0a0a0e] px-3 pt-2 pb-6 shrink-0">
+          <div class="flex items-center justify-between text-[10px] text-[#cfa972]/90 px-1 mb-1.5">
+            <span>● 当前以「迟川」账号同步发送</span><span class="text-zinc-500">轻触语音条播放转文字</span>
+          </div>
+          ${quicks.length ? `<div class="flex gap-1.5 overflow-x-auto no-sb pb-2">${quicks.map((q, i) => `<button type="button" data-qr="${i}" class="shrink-0 px-2.5 py-1 rounded-full bg-white/[0.06] border border-[#cfa972]/25 text-[11px] text-zinc-200 active:scale-95">${esc(q)}</button>`).join('')}</div>` : ''}
+          <form id="chatForm" class="flex items-center gap-2">
+            <input id="chatInp" autocomplete="off" placeholder="以迟川账号同步发送消息…" class="flex-1 rounded-full bg-white/[0.06] border border-white/10 px-3.5 py-2 text-[12.5px] text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-[#cfa972]/40" />
+            <button type="submit" class="px-4 py-2 rounded-full bg-zinc-100 text-zinc-950 text-[12px] font-medium active:scale-95">发送</button>
+          </form>
+        </div>`;
+
+      box.onclick = e => {
+        const vb = e.target.closest('button[data-vid]');
+        if (vb) return playVoice(vb.dataset.vid);
+        const qb = e.target.closest('button[data-qr]');
+        if (qb) return sendChat(quicks[+qb.dataset.qr]);
+      };
+      $('chatForm').onsubmit = e => { e.preventDefault(); sendChat($('chatInp').value); };
+      requestAnimationFrame(() => { const sc = $('chatScroll'); if (sc) sc.scrollTop = sc.scrollHeight; });
+    }
+
+    function openChat(id) {
+      SFX.tap(); S.chatId = id;
+      const c = CHATS.find(x => x.id === id);
+      if (c) { c.unread = 0; updateBadges(); }
+      if (id === 'lumiere') {
+        unlockEgg('e6');
+        setTimeout(() => { if (S.unlocked) pushBanner('本来想留到生日那天的定制戒指，被宝宝提前抓包了。内圈刻着 For Y.Y. · 迟琰，喜欢吗？', { sync: true }); }, 1400);
+      }
+      renderApp();
+    }
+
+    function playVoice(vid) {
+      const c = CHATS.find(x => x.id === S.chatId); if (!c) return;
+      const m = c.msgs.find(x => x.id === vid); if (!m) return;
+      SFX.voice(); m.played = true; m.showTxt = true; S.playingVoice = vid; renderApp();
+      setTimeout(() => { if (S.playingVoice === vid) { S.playingVoice = null; if (S.app === 'wechat') renderApp(); } }, 2200);
+    }
+
+    function replyBaby(t) {
+      if (/苏晚晴|外套|红酒/.test(t)) return { t: '苏晚晴那边我一步没越界，昨晚九点四十就离场回家了，地图和相册里我都留了离场时间证明。宝宝想怎么回她都行，爸爸全听你的。', v: { d: 11, txt: '乖，别为无关的人气着自己。她要是再发私人消息，我当着你的面直接拉黑。' } };
+      if (/温知夏|旧照|潜行者/.test(t)) return { t: '温知夏只是多年前的普通校友，我早就明确提醒她保持边界了。周末《潜行者》特展我只买了两张票，只带迟琰去。', v: { d: 9, txt: '过去的人和事在我心里早翻篇了，我现在的软肋和底气都只有你一个。' } };
+      if (/姜语汐|领带|妹妹/.test(t)) return { t: '叫你妹妹那句话我也看得很不顺眼。我已经让林助理正式发函更换公关对接人，领带我只系宝宝给我挑的。', v: { d: 9, txt: '你是名正言顺的迟太太，谁敢没大没小，爸爸第一个不答应。' } };
+      if (/吃醋|生气|睡书房/.test(t)) return { t: '我错在没把那些没分寸的人清理得更彻底。别让我睡书房，今晚回家先按 SOP 第一条把手机、定位和人全都交给你检查。', v: { d: 12, txt: '宝宝，别闷着气了。听爸爸一句解释，待会进门先把你抱怀里哄到笑为止，好不好？' } };
+      if (/毛衣|72%|羊绒/.test(t)) return { t: '……连 72% 的进度都被你看见了。还差最后一只袖口收针，选的是最软的奶白色山羊绒，绝不扎脖子，降温前一定交工。', v: { d: 10, txt: '虽然之前漏了一针拆过一次，但现在针脚特别齐整，宝宝一定会喜欢的。' } };
+      if (/搜索|浏览器/.test(t)) return { t: '咳……你把浏览器全翻完了？那些词条是我想把你照顾好才查的。笑完记得给我留点面子，宝宝。', v: { d: 9, txt: '至于最后那条……怎么哄你多叫几声爸爸，你现在要不要先喊一声听听？' } };
+      if (/心率|118|健康/.test(t)) return { t: '手表弹出你登录查岗那一秒，我是真有点慌——不是心虚，是怕藏着的惊喜提前曝光，更怕你误会。', v: { d: 8, txt: '平时开董事局会议心率都不超过65，唯独面对迟琰，我所有的冷静都会失效。' } };
+      if (/戒指|珠宝|lumiere/i.test(t)) return { t: 'LUMIÈRE 那枚戒圈刻了 For Y.Y. · 迟琰。本来打算下个月亲自戴到你无名指上，既然被发现了，今晚我就绕路取回来。', v: { d: 9, txt: '宝宝，我的每一条蓝图里，终极目标都是你。' } };
+      if (/转账|零花|黑卡|钱包/.test(t)) return { t: '钱本来就是赚给迟琰花的，钱包里专门给你开了五千两百万蓝图基金，想转多少直接划，不用问我。', v: { d: 8, txt: '金钱只是通往价值的桥梁，宝宝开心才是最重要的事。' } };
+      if (/想你|回家|爸爸/.test(t)) return { t: '听到你叫爸爸，刚才在车上紧绷的神经一下子全松了。再等十分钟就到楼下，副驾保温袋里装着你爱吃的蓝鳍刺身和无麸质蛋糕。', v: { d: 10, txt: '乖宝宝，把客厅灯留着，爸爸马上就回来抱你。' } };
+      return { t: '主设备同步看到了，宝宝。手机里每一页都经得起你翻，要是哪条看得不顺眼，直接拿我号回复，爸爸给你撑腰。', v: { d: 9, txt: '琰琰，查完岗记得下来吃晚饭，我已经在回家的路上了。' } };
+    }
+
+    /* =========================================================================
+       六·补、Gemini / OpenAI 双协议 API 引擎 & 多轮高能拉扯吃醋剧情
+       ========================================================================= */
+    function getActiveModelName() {
+      if (S.ai.provider === 'gemini') {
+        return ((S.ai.geminiCustom || '').trim() || S.ai.geminiModel || 'gemini-3.5-flash-lite').replace(/^models\//i, '');
+      }
+      return ((S.ai.openaiCustom || '').trim() || S.ai.openaiModel || 'gpt-4o-mini');
+    }
+
+    async function callDualAI(sysPrompt, userPrompt) {
+      const model = getActiveModelName();
+      if (S.ai.provider === 'gemini') {
+        const key = (S.ai.geminiKey || '').trim();
+        if (!key) throw new Error('未填写 Gemini API Key');
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`;
+        const res = await fetch(url, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+            systemInstruction: { parts: [{ text: sysPrompt }] },
+            generationConfig: { responseMimeType: 'application/json', temperature: 0.9 }
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error?.message || `HTTP ${res.status}`);
+        const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        return JSON.parse(raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim());
+      } else {
+        const key = (S.ai.openaiKey || '').trim();
+        const base = (S.ai.openaiUrl || 'https://api.openai.com/v1').trim().replace(/\/+$/, '');
+        if (!key) throw new Error('未填写 OpenAI 兼容 API Key');
+        const res = await fetch(`${base}/chat/completions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+          body: JSON.stringify({
+            model, temperature: 0.9,
+            messages: [
+              { role: 'system', content: sysPrompt + '\n请严格只输出合法的 JSON 对象，不要包含任何多余解释或 Markdown 代码块。' },
+              { role: 'user', content: userPrompt }
+            ]
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error?.message || `HTTP ${res.status}`);
+        const raw = data?.choices?.[0]?.message?.content || '';
+        const cleaned = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+        const match = cleaned.match(/\{[\s\S]*\}/);
+        return JSON.parse(match ? match[0] : cleaned);
+      }
+    }
+
+    function replyOther(id) {
+      // 多轮拉扯剧情：苏晚晴 / 温知夏 / 姜语汐前两轮绝不轻易认怂，刻意茶言茶语制造吃醋拉扯，第三轮迟川亲自下场封杀
+      if (id === 'suwanqing') {
+        const rd = (S.rivalRound.suwanqing = (S.rivalRound.suwanqing || 0) + 1);
+        if (rd === 1) return {
+          egg: 'e2',
+          c: '哦？原来是迟琰小姐在拿迟总手机回复呀。别这么紧张，我和迟川在投行圈打交道的时候，你大概还在念书呢。昨晚他的羊绒外套搭在我副驾上，上面还留着他那支冷杉雪松香——我好心替他送回来，迟太太平时管得挺严吧？',
+          cv: { d: 12, txt: '（轻笑一声，语气优雅又带着不动声色的挑衅）小姑娘吃醋可以理解，但百亿并购案的默契，可不是发几句脾气就能替代的哦。' },
+          b: '宝宝，我刚在主设备看见苏晚晴发的那句绿茶话了！气死我了，别听她胡说八道，那件外套我压根没放她车上！你继续怼她，我已经在让法务起草更换函了。'
+        };
+        if (rd === 2) return {
+          c: '换主承销？迟琰小姐果然单纯。瀚海跟新岚绑定这么深，迟川在谈判桌上最看重效率，他绝不会因为一点儿女私情破坏大局。今晚八点老地方的位置我依然替他留着，不如我们打个赌，看他最后听谁的🥂',
+          b: '她居然敢跟你打这种赌？宝宝别气，我现在直接以迟川本人名义发正式撤换通知，再回她一句，看她还能不能笑出来！',
+          v: { d: 10, txt: '（声线沉冷又护短）敢在我太太面前炫耀莫须有的默契，瀚海这个主承销席位我立刻撤掉。' }
+        };
+        unlockEgg('e11');
+        return {
+          c: '……等等，刚收到你们法务部和林助理的正式邮件，迟川你真为了她把瀚海移出主承销名单了？！……好，迟总好魄力。外套我放新岚前台了，以后公私两清，绝不再打扰迟太太！',
+          dadDirect: '【迟川主设备接入】苏总，更换函已抄送贵司合伙人。另外纠正一句：我太太从不敏感，是我嫌你越界。拉黑了。',
+          b: '搞定了宝宝！我亲自发消息把她拉黑并换掉投行了。刚才是不是把你气到了？待会回家爸爸跪键盘哄你笑好不好？',
+          v: { d: 11, txt: '（语气彻底软下来）听见没，苏晚晴彻底闭嘴了。宝宝在爸爸这里永远排在任何百亿项目前面。' }
+        };
+      }
+
+      if (id === 'wenzhixia') {
+        const rd = (S.rivalRound.wenzhixia = (S.rivalRound.wenzhixia || 0) + 1);
+        if (rd === 1) return {
+          egg: 'e3',
+          c: '迟琰小姐好呀，原来你真在翻他手机呢。别误会，我只是觉得波士顿那几年他太孤单了，暴雪夜发高烧也是我在实验室外等他。听说他现在连《潜行者》都陪你看？真难得……当年这部片子，可是我先推荐给他的呢。',
+          cv: { d: 11, txt: '（温柔叹息，字字戳心）他那种慢热又怀旧的人，嘴上再冷淡，心里对旧时光总归还是念着的吧。' },
+          b: '宝宝别被温知夏那套怀旧话术气到！当年根本没这回事，高烧是陈序送我去的医院！你尽管戳穿她，爸爸给你撑腰！'
+        };
+        if (rd === 2) return {
+          c: '是不是只为你，迟琰小姐心里其实也在打鼓吧？不然也不会一条条翻他聊天记录呀。周末美术馆放映会我坐第六排正中，他要是路过看见我，总不至于连点头之交都不认吧？',
+          b: '她怎么越说越过分了！宝宝，你再怼她一句，我马上亲自上号把她彻底封锁，周末放映会我也绝不会看别人一眼！'
+        };
+        unlockEgg('e11');
+        return {
+          c: '……阿川，你亲自上号说《潜行者》是你自己爱看、书也是周教授给的，连校友群都退了？……行吧，算我自作多情，祝你和迟琰白头偕老。',
+          dadDirect: '【迟川主设备接入】温小姐，不必编造波士顿的细节刺激我太太。过去毫无交集，周末放映会我们换场次了，勿联。',
+          b: '亲手把温知夏也清理干净了！宝宝，别为她说的那些假话难过一秒钟，我心里从头到尾只有迟琰。',
+          v: { d: 10, txt: '乖宝宝，我的过去很无聊，只有遇见迟琰之后才算真正活着。' }
+        };
+      }
+
+      if (id === 'jiangyuxi') {
+        const rd = (S.rivalRound.jiangyuxi = (S.rivalRound.jiangyuxi || 0) + 1);
+        if (rd === 1) return {
+          egg: 'e4',
+          c: '哎呀，原来是迟琰妹妹拿川哥手机回我呀～不好意思嘛，平时晚宴上大家都习惯看我帮川哥整理配饰啦，他也没当场拒绝过呀。川哥事业这么忙，身边总需要懂分寸又会活跃气氛的人陪着应酬，妹妹别这么小气嘛～',
+          cv: { d: 10, txt: '（娇滴滴的笑声）妹妹这么凶，小心川哥在外面忙了一天，回家还要听你闹脾气会累的哦～' },
+          b: '听她叫你“妹妹”我都气笑了！宝宝别客气，直接把她怼回去，我从来没让她碰过我衣领！'
+        };
+        if (rd === 2) return {
+          c: '换对接人？我们公关公司跟新岚签的是年度框架协议，哪有说换就换的呀～我已经在电梯里咯，领带先帮川哥送去顶楼办公室，妹妹要是不放心，也可以开视频盯着呀😜',
+          b: '她居然真敢往顶楼跑？！我已经给林助理和一楼安保打电话注销她临时访客码了，宝宝再给她最后一击！'
+        };
+        unlockEgg('e11');
+        return {
+          c: '等等？！电梯怎么刷不上顶楼了，林助理怎么真带安保来大厅把我的通行证收走了？！川哥你真让公关公司解约换人啊……行，算我多事，迟太太你赢了行了吧！',
+          dadDirect: '【迟川主设备接入】解约违约金新岚照付。另：我太太很可爱，怎么闹脾气我都乐意哄，轮不到外人置喙。',
+          b: '解气了吗宝宝？安保已经把姜语汐请出新岚大厅了，违约金我都懒得跟她计较，谁也不能在你面前装绿茶！',
+          v: { d: 10, txt: '（低笑宠溺）干得太漂亮了，迟太太。以后谁敢这么跟你说话，我见一个封一个。' }
+        };
+      }
+
+      const m = {
+        chenxu: { c: '哟，琰琰上线查岗了？放心，你家老干部昨晚九点四十就拎着无麸质小蛋糕跑路回家了！', cv: { d: 11, txt: '哈哈哈哈琰琰我作证，昨晚苏晚晴想递酒，老迟往后撤了两步差点撞上花瓶，纯情得很！' }, b: '陈序又在拿我打趣了。不过他说得没错，我昨晚确实九点四十就溜回家找你了。' },
+        lumiere: { c: '天哪是迟琰女士本人吗！迟先生反复强调要绝对保密的，看来惊喜提前揭晓了，恭喜二位！', b: '顾问刚给我发消息说漏嘴了……好吧宝宝，今晚取回来亲手给你戴上。' },
+        sunyu: { c: '这语气一看就是嫂子！琰琰周末一定来实验室玩呀，兄弟们都想当面谢谢你的甜品！', b: '孙遇一眼就认出是你了，周末想去实验室转转的话，爸爸带你去。' },
+        zhoumo: { c: '是琰琰拿小川手机回的吧？真乖，周六下午来院子里，奶奶给你留最甜的桂花糕。', b: '周老师都认出是你了。周六我们一起去郊外陪她喝茶。' },
+        shenmanli: { c: '迟川，你为了一个外人这么顶撞我？', b: '别理沈曼丽，宝宝。在我这里，迟琰是唯一的家人，谁也没资格对你指手画脚。' },
+        filehelper: { c: null, b: '看到你在翻文件传输助手了。凌晨两点那条语音……是不是听得你脸红了？' }
+      };
+      return m[id] || { c: '收到迟总！马上按您的指示落实到位。', b: '主设备同步看到你在帮我回消息了，想替爸爸回谁都可以。' };
+    }
+
+    async function sendChat(raw) {
+      const text = (raw || '').trim(); if (!text || !S.chatId) return;
+      const c = CHATS.find(x => x.id === S.chatId); if (!c) return;
+      SFX.tap(); const t = nowStr();
+      c.msgs.push({ id: 'o' + Date.now(), side: 'R', from: '迟川', t, text });
+      c.time = t; renderApp();
+
+      const useAI = S.ai.on && ((S.ai.provider === 'gemini' && S.ai.geminiKey.trim()) || (S.ai.provider === 'openai' && S.ai.openaiKey.trim()));
+      const cid = c.id;
+
+      if (cid === 'baobao') {
+        if (useAI) {
+          try {
+            const hist = c.msgs.slice(-8).map(m => `${m.from}: ${m.text || m.txt || '[图片]'}`).join('\n');
+            const j = await callDualAI(
+              '你是迟川（Cyrus），28岁新岚能源CEO，INTJ深情总裁。迟琰（你的宝宝/太太，喊你爸爸）正拿着你的备用机查岗并与你微信同步对话。回复要成熟克制又极其宠溺护短，绝不敷衍。仅返回JSON：{"t":"文字回复","v":"带括号神态的短语音转写"}',
+              `最近对话：\n${hist}\n迟琰刚发来：“${text}”。请以迟川口吻回复。`
+            );
+            if (j && j.t) {
+              const rt = nowStr();
+              c.msgs.push({ id: 'sr' + Date.now(), side: 'R', sync: true, from: '迟川', t: rt, text: String(j.t) });
+              if (j.v) c.msgs.push({ id: 'sv' + (Date.now() + 1), side: 'R', sync: true, from: '迟川', t: rt, voice: Math.max(7, Math.min(16, Math.round(String(j.v).length / 4.2))), played: false, txt: String(j.v) });
+              c.time = rt; SFX.msg();
+              if (S.app === 'wechat' && S.chatId === 'baobao') renderApp(); else { c.unread++; updateBadges(); }
+              return;
+            }
+          } catch { toast('API 暂不可用，已无缝切回本地回复'); }
+        }
+        setTimeout(() => {
+          const r = replyBaby(text), rt = nowStr();
+          c.msgs.push({ id: 'sr' + Date.now(), side: 'R', sync: true, from: '迟川', t: rt, text: r.t });
+          if (r.v) c.msgs.push({ id: 'sv' + (Date.now() + 1), side: 'R', sync: true, from: '迟川', t: rt, voice: r.v.d, played: false, txt: r.v.txt });
+          c.time = rt; SFX.msg();
+          if (S.app === 'wechat' && S.chatId === 'baobao') renderApp(); else { c.unread++; updateBadges(); }
+        }, 1200);
+        return;
+      }
+
+      // 吃醋对象 & 其他联系人：支持双引擎拉扯回复
+      const isRival = ['suwanqing', 'wenzhixia', 'jiangyuxi'].includes(cid);
+      if (useAI && cid !== 'filehelper') {
+        const rd = isRival ? (S.rivalRound[cid] = (S.rivalRound[cid] || 0) + 1) : 1;
+        if (cid === 'suwanqing') unlockEgg('e2');
+        if (cid === 'wenzhixia') unlockEgg('e3');
+        if (cid === 'jiangyuxi') unlockEgg('e4');
+        if (isRival && rd >= 3) unlockEgg('e11');
+        try {
+          const hist = c.msgs.slice(-8).map(m => `${m.from}: ${m.text || m.txt || '[图片]'}`).join('\n');
+          const rivalRule = isRival
+            ? (rd < 3
+              ? `你是${c.name}（${c.tag}），擅长茶言茶语/暗戳戳炫耀与迟川的默契或过去，故意让正在用迟川手机回消息的女朋友迟琰吃醋！当前是第${rd}轮交锋，【严禁立刻道歉认怂】，要优雅反击、推拉挑衅、让迟琰更有吃醋拉扯感！同时给出迟川在主设备同步看到的护短吐槽。`
+              : `你是${c.name}（${c.tag}），这是第${rd}轮交锋，迟川本人已介入并冷酷换掉合作方/拉黑你，你终于破防不甘心地退场。同时给出迟川主设备介入的冷酷封杀句和哄迟琰的话。`)
+            : `你是${c.name}（${c.tag}），猜到是迟川太太迟琰在用他手机回消息，按人设自然回复，并给出迟川的同步反应。`;
+          const j = await callDualAI(
+            `${rivalRule}\n仅返回JSON：{"c":"对方回复正文","cv":"可选对方短语音转写或空字符串","dadDirect":"可选迟川亲自介入句或空字符串","b":"迟川发给宝宝的同步推送护短话"}`,
+            `聊天上下文：\n${hist}\n刚发出：“${text}”`
+          );
+          if (j && j.c) {
+            const rt = nowStr();
+            c.msgs.push({ id: 'in' + Date.now(), side: 'L', from: c.group ? '孙遇' : c.name, t: rt, text: String(j.c) });
+            if (j.cv) c.msgs.push({ id: 'iv' + (Date.now() + 1), side: 'L', from: c.name, t: rt, voice: Math.max(7, Math.min(15, Math.round(String(j.cv).length / 4))), played: false, txt: String(j.cv) });
+            if (j.dadDirect) c.msgs.push({ id: 'dd' + (Date.now() + 2), side: 'R', sync: true, from: '迟川', t: rt, text: String(j.dadDirect) });
+            c.time = rt; SFX.tap();
+            if (S.app === 'wechat' && S.chatId === cid) renderApp(); else { c.unread++; updateBadges(); }
+            if (j.b) setTimeout(() => { if (S.unlocked) pushBanner(String(j.b), { sync: true }); }, 1400);
+            return;
+          }
+        } catch { toast('API 暂不可用，已切回本地多轮吃醋引擎'); }
+      }
+
+      const r = replyOther(cid);
+      if (r.egg) unlockEgg(r.egg);
+      if (r.c) setTimeout(() => {
+        const rt = nowStr();
+        c.msgs.push({ id: 'in' + Date.now(), side: 'L', from: c.group ? '孙遇' : c.name, t: rt, text: r.c });
+        if (r.cv) c.msgs.push({ id: 'iv' + (Date.now() + 1), side: 'L', from: c.name, t: rt, voice: r.cv.d, played: false, txt: r.cv.txt });
+        if (r.dadDirect) setTimeout(() => {
+          c.msgs.push({ id: 'dd' + Date.now(), side: 'R', sync: true, from: '迟川', t: nowStr(), text: r.dadDirect });
+          SFX.msg(); if (S.app === 'wechat' && S.chatId === cid) renderApp();
+        }, 900);
+        c.time = rt; SFX.tap();
+        if (S.app === 'wechat' && S.chatId === cid) renderApp(); else { c.unread++; updateBadges(); }
+      }, 1000);
+      setTimeout(() => { if (S.unlocked) pushBanner(r.b, { sync: true, voice: r.v || null }); }, 2100);
+    }
+
+    /* =========================================================================
+       七、APP 2: 朋友圈（9条精选动态 + 多轮吃醋拉扯反击评论）
+       ========================================================================= */
+    function vMoments() {
+      $('appLayer').innerHTML = headerBar('朋友圈', '当前账号：迟川') + `
+        <div class="flex-1 overflow-y-auto no-sb safe-pb">
+          <div class="h-32 bg-gradient-to-b from-[#1a1820] via-[#0e0d12] to-[#050505] px-5 pb-4 flex items-end justify-between border-b border-[#232326]">
+            <div>
+              <div class="text-[10.5px] tracking-[0.22em] text-[#cfa972]">CHI CHUAN · 仅余生与你</div>
+              <div class="text-[12px] text-zinc-400 mt-1">金钱只是桥梁，迟琰才是彼岸</div>
+            </div>
+            <div class="flex items-center gap-2.5"><span class="text-[15px] font-medium">迟川</span><div class="w-11 h-11 rounded-2xl bg-[#1a1a22] border border-[#cfa972]/35 flex items-center justify-center text-[17px]">迟</div></div>
+          </div>
+          <div class="divide-y divide-white/[0.06] px-4">
+            ${MOMENTS.map(p => `<article class="py-4 flex gap-3">
+              <div class="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center text-[14px] border ${p.rival ? 'bg-[#231418] border-[#e04f4f]/35 text-rose-200' : 'bg-[#17171f] border-white/10 text-zinc-200'}">${esc(p.av)}</div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-[14px] font-medium text-zinc-100">${esc(p.author)}</span>
+                  ${p.vis ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-[#cfa972]/15 text-[#e8cba0]">${esc(p.vis)}</span>` : ''}
+                  ${p.hidden ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400">已设为仅自己可见</span>' : ''}
+                </div>
+                <p class="text-[13px] text-zinc-300 leading-relaxed mt-1 ${p.hidden ? 'line-through opacity-50' : ''}">${esc(p.text)}</p>
+                <div class="mt-2.5 h-28 rounded-2xl border border-white/[0.08] bg-gradient-to-br ${p.art.bg} p-3 flex flex-col justify-between">
+                  <span class="text-[9.5px] tracking-[0.2em] text-zinc-300/75">${esc(p.art.k)}</span>
+                  <span class="text-[11px] text-zinc-200/90">${esc(p.art.sub)}</span>
+                </div>
+                <div class="flex items-center justify-between mt-2.5">
+                  <span class="text-[11px] text-zinc-500">${esc(p.time)}</span>
+                  <div class="flex gap-1.5">
+                    <button type="button" data-lk="${p.id}" class="px-2.5 py-0.5 rounded-full bg-white/[0.06] text-[11px] ${p.liked ? 'text-[#e04f4f]' : 'text-zinc-400'}">${p.liked ? '♥ 已赞' : '♡ 赞'}</button>
+                    <button type="button" data-cm="${p.id}" class="px-2.5 py-0.5 rounded-full bg-white/[0.06] text-[11px] text-zinc-300">评论</button>
+                  </div>
+                </div>
+                ${(p.likes.length || p.comments.length) ? `<div class="mt-2.5 rounded-xl bg-white/[0.035] border border-white/[0.06] px-3 py-2 space-y-1 text-[12px]">
+                  ${p.likes.length ? `<div class="text-zinc-400"><span class="text-[#e04f4f] mr-1">♥</span>${p.likes.map(esc).join('、')}</div>` : ''}
+                  ${p.comments.map(c => `<div><span class="text-zinc-200 font-medium">${esc(c.a)}：</span><span class="text-zinc-400">${esc(c.t)}</span></div>`).join('')}
+                </div>` : ''}
+                <div id="cbox-${p.id}" class="hidden mt-2 space-y-1.5">
+                  ${p.quick ? `<button type="button" data-qc="${p.id}" class="w-full text-left px-3 py-1.5 rounded-xl bg-[#cfa972]/12 border border-[#cfa972]/30 text-[11.5px] text-[#f2dec0] active:scale-[.99]">⚡ 一键以迟川评论：${esc(p.quick)}</button>` : ''}
+                  <form data-cf="${p.id}" class="flex gap-1.5">
+                    <input placeholder="以「迟川」身份评论…" class="flex-1 rounded-full bg-white/[0.06] border border-white/10 px-3 py-1.5 text-[12px] text-zinc-100 focus:outline-none" />
+                    <button type="submit" class="px-3.5 py-1 rounded-full bg-zinc-100 text-zinc-950 text-[11.5px] font-medium">发送</button>
+                  </form>
+                </div>
+              </div>
+            </article>`).join('')}
+          </div>
+        </div>`;
+
+      const box = $('appLayer');
+      box.onclick = e => {
+        const lb = e.target.closest('button[data-lk]');
+        if (lb) {
+          SFX.tap(); const p = MOMENTS.find(x => x.id === lb.dataset.lk);
+          p.liked = !p.liked;
+          p.likes = p.liked ? ['迟川', ...p.likes.filter(n => n !== '迟川')] : p.likes.filter(n => n !== '迟川');
+          return vMoments();
+        }
+        const cb = e.target.closest('button[data-cm]');
+        if (cb) {
+          SFX.tap(); const w = $('cbox-' + cb.dataset.cm);
+          w.classList.toggle('hidden'); if (!w.classList.contains('hidden')) w.querySelector('input').focus();
+          return;
+        }
+        const qb = e.target.closest('button[data-qc]');
+        if (qb) { const p = MOMENTS.find(x => x.id === qb.dataset.qc); return submitMomentComment(p.id, p.quick); }
+      };
+      box.querySelectorAll('form[data-cf]').forEach(f => {
+        f.onsubmit = e => { e.preventDefault(); submitMomentComment(f.dataset.cf, f.querySelector('input').value); };
+      });
+    }
+
+    function submitMomentComment(pid, raw) {
+      const txt = (raw || '').trim(); if (!txt) return;
+      const p = MOMENTS.find(x => x.id === pid); if (!p) return;
+      SFX.tap(); p.comments.push({ a: '迟川', t: txt }); vMoments();
+
+      setTimeout(() => {
+        if (pid === 'm1') {
+          unlockEgg('e5');
+          const mr = (S.momentRound.m1 = (S.momentRound.m1 || 0) + 1);
+          if (mr === 1) {
+            p.comments.push({ a: '苏晚晴', t: '回复 迟川：迟太太亲自来巡逻啦？🥂 只是聊了并购案顺手拍的氛围图，没必要这么紧张吧，迟总平时可大度多了。' });
+            pushBanner('苏晚晴居然敢在朋友圈阴阳你？！宝宝再评论她一句，或者看我亲自下场封她的嘴！', { sync: true });
+          } else {
+            p.hidden = true;
+            p.comments.push({ a: '迟川', t: '回复 苏晚晴：是我本人。立刻删图，明天瀚海不必再参会。' });
+            p.comments.push({ a: '苏晚晴', t: '……已设为仅自己可见，抱歉打扰迟总和迟太太。' });
+            pushBanner('这下彻底老实了！我亲自下场让她秒锁动态，宝宝解气了吗？', { sync: true });
+          }
+        } else if (pid === 'm2') {
+          const mr = (S.momentRound.m2 = (S.momentRound.m2 || 0) + 1);
+          if (mr === 1) {
+            p.comments.push({ a: '温知夏', t: '回复 迟川：迟琰小姐别多心呀，只是感慨一下波士顿的雪罢了，旧回忆又抢不走现在的人。' });
+            pushBanner('温知夏这句听着真膈应人，宝宝再补一刀，我直接把她朋友圈屏蔽掉！', { sync: true });
+          } else {
+            p.hidden = true;
+            p.comments.push({ a: '迟川', t: '回复 温知夏：无须感慨，已取消好友权限。' });
+            pushBanner('已拉黑清空，周末只带迟琰去看展。', { sync: true });
+          }
+        } else if (pid === 'm3') {
+          const mr = (S.momentRound.m3 = (S.momentRound.m3 || 0) + 1);
+          if (mr === 1) {
+            p.comments.push({ a: '姜语汐', t: '回复 迟川：呀～妹妹连工作配饰都要吃醋呀？我还以为川哥平时挺欣赏我眼光的呢✨' });
+            pushBanner('她还敢回嘴叫你妹妹！宝宝再回一条，我刚让公关部发解约函了！', { sync: true });
+          } else {
+            p.hidden = true;
+            p.comments.push({ a: '姜语汐', t: '收到解约函了……动态已删，对不起迟总迟太太！' });
+            pushBanner('领带我只系宝宝挑的，今晚回去你再帮爸爸系一次。', { sync: true });
+          }
+        } else if (pid === 'm4') {
+          p.comments.push({ a: '迟川', t: '回复 宝宝：这条本来就只设了仅你可见，翻完朋友圈早点歇着。' });
+        } else {
+          p.comments.push({ a: '陈序', t: '回复 迟川：这口吻一看就是琰琰拿着老迟手机在巡逻！' });
+        }
+        SFX.msg(); if (S.app === 'moments') vMoments();
+      }, 1250);
+    }
+
+    /* =========================================================================
+       八、APP 3: 通话与 5 组多轮分支互动语音通话
+       ========================================================================= */
+    const CALL_SCRIPTS = {
+      su: {
+        av: '苏', name: '苏晚晴', sub: '投行VP · 夜间语音来电', red: true,
+        open: '“喂，迟总？我是苏晚晴。你的羊绒外套还在我车上呢，上面还留着你那支冷杉香水味，要不我顺路给你送到云顶公寓楼下，顺便把昨晚没聊完的条款再对一遍？”',
+        turns: [
+          [
+            { q: '“你好，我是迟琰。外套放新岚前台就行，云顶公寓不欢迎外人。”', a: '“哦？原来是迟琰小姐接的电话呀……（轻笑一声）别这么有敌意嘛，我和迟川聊的是几十亿的项目，你这么替他做主挂我电话，他不会觉得你太不懂事吗？”', next: 1 },
+            { q: '“苏总，大晚上往有妇之夫家里送衣服，投行礼仪是这么教的？”', a: '“呵呵，迟太太真会说笑。迟川平时在谈判桌上多冷静体面，倒是没想到私底下找了个这么爱吃醋的小姑娘——那外套我可先替他收着了？”', next: 1 }
+          ],
+          [
+            { q: '“省省吧，迟川就在主设备同步看着呢，瀚海的主承销席位他刚让林助理撤了。”', a: '“……什么？！林助理刚给我发了邮件通知？！（语气瞬间慌乱变冷）……迟川真为了你把瀚海换掉了？好，算你们狠，外套我明早扔新岚前台，再见！”', end: true },
+            { q: '“不劳费心，他最喜欢我管着他。苏总还是先担心明天怎么跟合伙人交代吧。”', a: '“……（短暂沉默，手机提示音响起）林助理刚发的更换对接函……迟太太好手段，打扰了！”', end: true }
+          ]
+        ]
+      },
+      dad: {
+        av: '迟', name: '爸爸 · 迟川主设备', sub: '主设备直连语音 · 温柔在线', gold: true,
+        open: '“喂，宝宝？主设备一直弹同步提示，我猜你刚把我手机翻了个底朝天。是不是看见什么让你吃醋的人和事了？别憋着，跟爸爸说。”',
+        turns: [
+          [
+            { q: '“哼，苏晚晴和姜语汐刚才还在给你发消息，我都帮你怼回去了！”', a: '“做得太好了，琰琰。是我边界清理得还不够彻底，才让她们敢来烦你。林助理已经发函换掉对接人了，苏晚晴的私人号我现在就当着你面拉黑。”', next: 1 },
+            { q: '“我翻到了你的秘密日记、浏览器搜索记录，还有心率飙到118！”', a: '“咳……这下真的一点底牌都没留住了。宝宝，我平时开十亿的会心率都不带抖的，只有怕你误会、怕你不理我的时候才会慌成这样。”', next: 1 }
+          ],
+          [
+            { q: '“那……那枚 LUMIÈRE 戒指和海边画室，都是真的吗？”', a: '“每一笔契税、每一张图纸、还有戒圈里刻的 For Y.Y. · 迟琰，全都是真的。我不擅长讲花哨的情话，但把我最擅长的未来蓝图全写上了你的名字。”', next: 2 },
+            { q: '“那件奶白色毛衣，爸爸织完真要亲手给我穿呀？”', a: '“当然，还差最后十几行收针。虽然之前漏针被陈序笑话了一顿，但奶白色山羊绒最配你，降温前一定亲手给宝宝套上。”', next: 2 }
+          ],
+          [
+            { q: '“好吧原谅你了，爸爸快点回家陪我吃晚饭嘛。”', a: '“听到宝宝叫爸爸，我就彻底安心了。车已经拐进云顶地库了，副驾保温袋里装着你最爱的刺身和无麸质栗子蛋糕。两分钟后开门抱你。”', end: true },
+            { q: '“哼，回家先让我抱五分钟，再把黑卡交出来！”', a: '“黑卡、密码、手机，连同迟川本人，全归迟琰所有。乖，五分钟哪够，今晚爸爸抱着你哄一整晚。”', end: true }
+          ]
+        ]
+      },
+      chenxu: {
+        av: '陈', name: '陈序', sub: '战略顾问 · 好友通话',
+        open: '“喂老迟，怎么突然打语音？等等……这呼吸声不对啊，是琰琰吧！”',
+        turns: [
+          [
+            { q: '“哈哈被发现了！陈序，迟川昨晚峰会真没跟苏晚晴喝酒吗？”', a: '“我拿十年交情担保！苏晚晴刚想敬酒，迟川直接说‘我太太不让我晚归’然后九点四十准时撤退，顺便还打包了无麸质蛋糕，把我一个人晾在宴会厅！”', next: 1 },
+            { q: '“陈序，听说他半夜偷偷学织毛衣被你抓包了？”', a: '“岂止啊！堂堂新岚CEO戴着眼镜研究4.0mm棒针怎么起针，还为了无麸质面团发不起来给我打了四十分钟越洋复盘电话，全是为了你！”', next: 1 }
+          ],
+          [
+            { q: '“哈哈哈哈谢谢陈序，周末让他请客吃饭！”', a: '“一言为定！记得多夸夸他那件毛衣，不然老干部嘴上不说，心里可记挂着呢，先挂啦！”', end: true }
+          ]
+        ]
+      },
+      wen: {
+        av: '温', name: '温知夏', sub: '海外校友',
+        open: '“阿川？你主动给我打语音，是周末美术馆那场放映会有空了吗？”',
+        turns: [
+          [
+            { q: '“温小姐你好，我是迟琰。周末的票迟川只买了我们俩的，旧照也请别再发了。”', a: '“……原来是迟琰。是我打扰了，看来他确实把你护得很紧。以后不会再联系了，再见。”', end: true }
+          ]
+        ]
+      },
+      lin: {
+        av: '林', name: '林助理', sub: '首席特助',
+        open: '“迟总您好——哦，听声音是迟琰小姐吧！请问有什么需要我汇报或安排的？”',
+        turns: [
+          [
+            { q: '“林助理辛苦啦，苏晚晴和姜语汐那边都处理好了吗？”', a: '“请迟琰小姐绝对放心！苏晚晴女士的所有商务对接已转法务邮箱；姜语汐女士的公关更换函刚发完。迟总明确吩咐过，以后任何非工作私联一律直接拦截。”', next: 1 }
+          ],
+          [
+            { q: '“谢谢林助理，另外南湾画室那边进展怎么样了？”', a: '“产权过户已经全部完成，写的是您一个人的名字。迟总特意要求防眩光玻璃和恒温系统用最高规格。您还有其他吩咐随时打我电话！”', end: true }
+          ]
+        ]
+      }
+    };
+
+    function vPhone() {
+      const tabs = `<div class="px-4 pt-3 pb-2"><div class="grid grid-cols-3 p-1 rounded-xl bg-white/[0.05] border border-white/[0.08] text-[12px]">
+        ${[['recents','最近通话'],['quick','联系人快拨'],['dial','拨号键盘']].map(([k,n]) => `<button type="button" onclick="SFX.tap();S.phoneTab='${k}';renderApp()" class="py-1.5 rounded-lg ${S.phoneTab===k?'bg-white/15 text-zinc-100 font-medium':'text-zinc-400'}">${n}</button>`).join('')}
+      </div></div>`;
+      let body = '';
+      if (S.phoneTab === 'recents') {
+        body = `<div class="flex-1 overflow-y-auto no-sb px-4 pb-10 space-y-2">${CALL_LOGS.map(l => `
+          <div class="card rounded-2xl px-4 py-3 flex items-center justify-between">
+            <div>
+              <div class="text-[14px] ${l.missed ? 'text-[#e04f4f]' : 'text-zinc-100'}">${esc(l.name)} <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.07] text-zinc-400 ml-1">${esc(l.type)}</span></div>
+              <div class="text-[11px] text-zinc-500 mt-1">${esc(l.time)} · ${esc(l.dur)}</div>
+            </div>
+            <button type="button" onclick="startCall('${l.id}',${l.id!=='su'})" class="w-9 h-9 rounded-full bg-white/[0.07] flex items-center justify-center text-zinc-200 active:scale-90">${svg('phone', 15)}</button>
+          </div>`).join('')}</div>`;
+      } else if (S.phoneTab === 'quick') {
+        const list = [['dad','爸爸 · 迟川主设备','直连语音哄你（3轮对话）',true],['su','重播：苏晚晴夜间来电','高能吃醋来电体验',false],['chenxu','陈序（战略顾问）','套迟川的秘密与糗事',true],['wen','温知夏（海外校友）','直接通话划清边界',true],['lin','林助理（首席特助）','核对行程与画室进度',true]];
+        body = `<div class="flex-1 overflow-y-auto no-sb px-4 pb-10 space-y-2.5">${list.map(([id,t,s,dir]) => `
+          <button type="button" onclick="startCall('${id}',${dir})" class="w-full card rounded-2xl p-4 flex items-center justify-between text-left active:scale-[.99]">
+            <div><div class="text-[14px] ${id==='dad'?'text-[#e8cba0]':id==='su'?'text-rose-300':'text-zinc-100'} font-medium">${t}</div><div class="text-[11.5px] text-zinc-400 mt-1">${s}</div></div>
+            <span class="w-10 h-10 rounded-full ${id==='su'?'bg-[#e04f4f]/20 text-rose-300':'bg-[#cfa972]/18 text-[#e8cba0]'} flex items-center justify-center">${svg('phone', 16)}</span>
+          </button>`).join('')}</div>`;
+      } else {
+        body = `<div class="flex-1 flex flex-col items-center justify-between px-6 pb-9">
+          <div class="text-center min-h-[42px]"><div class="text-[25px] font-light tracking-wider tabular-nums">${esc(S.dialBuf) || '&nbsp;'}</div><div class="text-[11px] text-zinc-500">${S.dialBuf.includes('1229') ? '匹配：爸爸 · 迟川主设备' : '输入号码或按绿色键直连迟川'}</div></div>
+          <div class="grid grid-cols-3 gap-x-6 gap-y-2.5">${['1','2','3','4','5','6','7','8','9','*','0','#'].map(d => `<button type="button" onclick="SFX.tap();if(S.dialBuf.length<13)S.dialBuf+='${d}';renderApp()" class="w-14 h-14 rounded-full bg-white/[0.05] border border-white/10 text-[22px] font-light active:bg-white/20">${d}</button>`).join('')}</div>
+          <div class="flex items-center gap-8"><span class="w-10"></span><button type="button" onclick="startCall('dad',true)" class="w-14 h-14 rounded-full bg-emerald-600 flex items-center justify-center shadow-lg active:scale-90">${svg('phone', 22)}</button><button type="button" onclick="SFX.tap();S.dialBuf=S.dialBuf.slice(0,-1);renderApp()" class="w-10 text-zinc-400">${svg('del', 20)}</button></div>
+        </div>`;
+      }
+      $('appLayer').innerHTML = headerBar('通话', '支持多轮互动语音') + tabs + body;
+    }
+
+    function startCall(who, direct = false) {
+      endCall(true);
+      const sc = CALL_SCRIPTS[who]; if (!sc) return;
+      S.callActive = true;
+      if (who === 'su') S.suAutoFired = true;
+      if (who === 'dad') S.dadAutoFired = true;
+      const m = $('callModal'); m.classList.remove('hidden'); m.classList.add('flex');
+      if (direct) return connectVoice(who);
+
+      SFX.ring();
+      S.ringTick = setInterval(() => SFX.ring(), 2100);
+      m.innerHTML = `
+        <div class="text-center mt-5 buzz">
+          <div class="relative w-24 h-24 mx-auto mb-5 flex items-center justify-center">
+            <span class="pulse-ring absolute inset-0 rounded-full border ${sc.red ? 'border-[#e04f4f]/45' : 'border-[#cfa972]/45'}"></span>
+            <div class="w-24 h-24 rounded-full flex items-center justify-center text-[32px] font-light border ${sc.red ? 'bg-[#231418] border-[#e04f4f]/45 text-rose-100' : 'bg-[#261e16] border-[#cfa972]/45 text-[#f6e5ce]'}">${sc.av}</div>
+          </div>
+          <div class="text-[23px] text-zinc-100">${sc.name}</div>
+          <div class="text-[13px] ${sc.red ? 'text-[#f28585]' : 'text-[#cfa972]'} mt-1.5">${sc.sub}</div>
+        </div>
+        <div class="text-center text-[12px] text-zinc-400 px-6 leading-relaxed">
+          ${who === 'su' ? '【突发吃醋来电】苏晚晴夜间打来语音电话，要接起来宣誓主权还是直接挂断？' : '【专属语音来电】迟川从主设备直接拨了过来，接听听听爸爸怎么哄你吧。'}
+        </div>
+        <div class="w-full flex items-center justify-around pb-4">
+          <button type="button" onclick="declineVoice('${who}')" class="flex flex-col items-center gap-2 text-zinc-300">
+            <span class="w-16 h-16 rounded-full bg-[#e04f4f] flex items-center justify-center shadow-lg active:scale-90"><span class="rotate-[135deg]">${svg('phone', 24)}</span></span>
+            <span class="text-[12px]">挂断</span>
+          </button>
+          <button type="button" onclick="connectVoice('${who}')" class="flex flex-col items-center gap-2 text-zinc-200">
+            <span class="w-16 h-16 rounded-full bg-emerald-600 flex items-center justify-center shadow-lg active:scale-90">${svg('phone', 24)}</span>
+            <span class="text-[12px]">接听</span>
+          </button>
+        </div>`;
+    }
+
+    function declineVoice(who) {
+      endCall(true); SFX.tap();
+      if (who === 'su') {
+        CALL_LOGS.unshift({ id: 'su', name: '苏晚晴', tag: '投行VP', type: '已挂断', dur: '未接通', time: nowStr(), missed: true });
+        pushBanner('宝宝直接把苏晚晴电话挂了？挂得好。等我一下，爸爸马上打语音给你解释。', { sync: true });
+        setTimeout(() => { if (S.unlocked && !S.callActive) startCall('dad', false); }, 2500);
+      } else toast('已挂断来电');
+    }
+
+    function connectVoice(who) {
+      clearInterval(S.ringTick); SFX.voice();
+      const sc = CALL_SCRIPTS[who]; let sec = 0, turnIdx = 0, muted = false, spk = true;
+      const m = $('callModal');
+
+      const paintTurn = (subText, done = false) => {
+        const opts = done ? [] : (sc.turns[turnIdx] || []);
+        m.innerHTML = `
+          <div class="text-center mt-1">
+            <div class="w-20 h-20 mx-auto rounded-full flex items-center justify-center text-[28px] font-light border ${sc.red ? 'bg-[#231418] border-[#e04f4f]/45 text-rose-100' : 'bg-[#261e16] border-[#cfa972]/45 text-[#f6e5ce]'}">${sc.av}</div>
+            <div class="text-[19px] text-zinc-100 mt-2.5">${sc.name}</div>
+            <div id="cClk" class="text-[12px] text-zinc-400 mt-1 tabular-nums">${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}</div>
+          </div>
+          <div class="w-full space-y-3 my-auto">
+            <div class="flex justify-center gap-1.5 h-6 items-center v-play ${sc.red ? 'text-[#e04f4f]' : 'text-[#cfa972]'}">
+              <i class="vb w-[3px] h-2 bg-current rounded-full"></i><i class="vb w-[3px] h-5 bg-current rounded-full"></i><i class="vb w-[3px] h-3 bg-current rounded-full"></i><i class="vb w-[3px] h-5 bg-current rounded-full"></i>
+            </div>
+            <div class="rounded-2xl bg-white/[0.05] border border-white/10 p-4 text-center min-h-[94px] flex flex-col justify-center">
+              <div class="text-[10.5px] ${sc.red ? 'text-[#f28585]' : 'text-[#cfa972]'} mb-1">${sc.name} · 实时语音字幕</div>
+              <p class="text-[13px] text-zinc-100 leading-relaxed">${esc(subText)}</p>
+            </div>
+            <div id="cOpts" class="space-y-2">
+              ${done ? '<div class="text-center text-[11.5px] text-zinc-400 py-2">通话即将自动结束…</div>' : opts.map((o, i) => `<button type="button" data-oi="${i}" class="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.07] hover:bg-white/[0.13] border border-white/10 text-[12px] text-zinc-100 text-left active:scale-[.98]">${esc(o.q)}</button>`).join('')}
+            </div>
+          </div>
+          <div class="w-full flex items-center justify-around pb-1">
+            <button type="button" id="muteBtn" class="px-3.5 py-2 rounded-full text-[11.5px] border ${muted ? 'bg-zinc-100 text-zinc-950 border-zinc-100' : 'bg-white/[0.06] text-zinc-300 border-white/10'}">${muted ? '已静音' : '静音'}</button>
+            <button type="button" onclick="endCall(false,'${who}')" class="w-14 h-14 rounded-full bg-[#e04f4f] flex items-center justify-center shadow-lg active:scale-90"><span class="rotate-[135deg]">${svg('phone', 22)}</span></button>
+            <button type="button" id="spkBtn" class="px-3.5 py-2 rounded-full text-[11.5px] border ${spk ? 'bg-[#cfa972]/20 text-[#e8cba0] border-[#cfa972]/40' : 'bg-white/[0.06] text-zinc-300 border-white/10'}">${spk ? '扬声器开' : '听筒'}</button>
+          </div>`;
+
+        $('muteBtn').onclick = () => { SFX.tap(); muted = !muted; paintTurn(subText, done); };
+        $('spkBtn').onclick = () => { SFX.tap(); spk = !spk; paintTurn(subText, done); };
+        $('cOpts').onclick = e => {
+          const b = e.target.closest('button[data-oi]'); if (!b) return;
+          const pick = opts[+b.dataset.oi]; SFX.voice();
+          if (pick.end) {
+            paintTurn(pick.a, true);
+            setTimeout(() => endCall(false, who), 2400);
+          } else {
+            turnIdx = pick.next; paintTurn(pick.a, false);
+          }
+        };
+      };
+
+      paintTurn(sc.open, false);
+      S.callTick = setInterval(() => {
+        sec++; const c = $('cClk');
+        if (c) c.textContent = `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
+      }, 1000);
+    }
+
+    function endCall(silent = false, who = '') {
+      clearInterval(S.callTick); clearInterval(S.ringTick);
+      S.callActive = false;
+      $('callModal').classList.add('hidden'); $('callModal').classList.remove('flex');
+      if (!silent && who === 'su') {
+        CALL_LOGS.unshift({ id: 'su', name: '苏晚晴', tag: '投行VP', type: '已接听', dur: '00:26', time: nowStr() });
+        toast('苏晚晴已慌忙挂断电话');
+        setTimeout(() => { if (S.unlocked && !S.callActive) startCall('dad', false); }, 2500);
+      } else if (!silent) {
+        if (who === 'dad') CALL_LOGS.unshift({ id: 'dad', name: '爸爸 · 迟川主设备', tag: '置顶', type: '已接听', dur: '01:12', time: nowStr() });
+        toast('语音通话已结束');
+      }
+    }
+
+    /* =========================================================================
+       十·补、新增第2/3页应用：音乐、录音机、新岚内网、API引擎、桌面图标生成器
+       ========================================================================= */
+    const MUSIC_LIST = [
+      { id: 'ms1', t: 'Stalker · Meditation (《潜行者》配乐)', a: 'Eduard Artemyev', dur: '04:18', n: '以前独自在书房循环的荒原纯音，遇见迟琰后听出了安静的归宿感。', notes: [261.6, 311.1, 392.0, 466.2] },
+      { id: 'ms2', t: 'Nocturne Op.9 No.2 (深夜书房钢琴)', a: 'Chopin', dur: '04:32', n: '每晚帮迟琰吹完头发、看她睡熟后，独自织毛衣时的背景音乐。', notes: [293.7, 349.2, 440.0, 523.3] },
+      { id: 'ms3', t: 'Midnight Rain Over South Bay', a: 'Cyrus Study Mix', dur: '03:56', n: '南湾海边画室雨夜采风实录，特意调了低频海浪声助眠。', notes: [220.0, 261.6, 329.6, 392.0] },
+      { id: 'ms4', t: '🔒 隐藏曲目：写给迟琰的雨夜', a: '迟川 · 私人收藏', dur: '01:29', secret: true, n: '【迟川的隐藏乐评】外人以为我只听冷冰冰的古典乐，其实这首是我悄悄为你哼过的一段旋律——宝宝，永远别怀疑自己在爸爸心里的位置。', notes: [329.6, 392.0, 493.9, 587.3, 659.3] }
+    ];
+
+    const REC_MEMOS = [
+      { id: 'rc1', t: '凌晨02:18 · 没敢发出去的毛衣碎碎念', d: '昨晚 · 00:24', tx: '（极其轻微的竹棒针轻碰声）……右袖口还剩最后十八行。刚才差点又漏一针，幸好及时挑回来了。宝宝睡得真香，刚才替她掖被角的时候，她还迷迷糊糊抓了我一下手指。真想快点降温，好名正言顺看她穿上这件奶白色羊绒。' },
+      { id: 'rc2', t: '峰会散场前 · 地下车库自证录音', d: '昨晚 21:38 · 00:18', tx: '（车库隐约脚步声与车门关合声）九点三十八分，已离场。苏晚晴递过来的红酒一滴未碰。张师傅，绕去城西甜品店拿无麸质栗子蛋糕吧，别让琰琰等久了。' },
+      { id: 'rc3', t: '吃醋哄人台词笨拙演练 #03', d: '11月21日 · 00:21', tx: '（轻咳一声，语气认真得像在排练路演）“宝宝，我错了，是我没把无关异性的边界清理干净……别睡书房，今晚全听你的……”（停顿，无奈低笑）算了，背台词太生硬，到时候直接把她抱进怀里亲一下，叫她乖宝宝，应该比讲道理管用。' },
+      { id: 'rc4', t: '写给 12月29日 28岁生日的悄悄话', d: '11月19日 · 00:27', tx: '（嗓音沉稳滚烫）再过一个多月我就28岁了。以前这个日子只是年终封账，今年我把全天行程都锁死了，只属于迟琰。LUMIÈRE 的戒圈内侧刻了 For Y.Y. · 迟琰。希望那天海边风不大，她能笑着答应我。' }
+    ];
+
+    function vMusic() {
+      $('appLayer').innerHTML = headerBar('音乐', '迟川的深夜私人歌单') + `
+        <div class="flex-1 overflow-y-auto no-sb px-4 pt-3.5 safe-pb space-y-3">
+          <div class="gold-card rounded-[24px] p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] tracking-[0.2em] text-[#cfa972]">CYRUS PRIVATE PLAYLIST</span>
+              <span class="text-[10.5px] text-rose-300">${S.playingTrack ? '● 正在播放旋律' : '轻触曲目试听'}</span>
+            </div>
+            <div class="text-[16px] font-medium text-zinc-100">深夜书房与海边雨声</div>
+            <p class="text-[11.5px] text-zinc-400">共 4 首精选（含 1 首仅对迟琰解锁的隐藏曲目）</p>
+          </div>
+          <div class="space-y-2.5">${MUSIC_LIST.map(tr => {
+            const on = S.playingTrack === tr.id;
+            return `<div class="card rounded-2xl p-4 ${tr.secret ? 'border-[#cfa972]/45' : ''}">
+              <button type="button" onclick="playMusicTrack('${tr.id}')" class="w-full flex items-center justify-between text-left gap-3">
+                <div class="min-w-0">
+                  <div class="text-[13.5px] font-medium ${tr.secret ? 'text-[#f5e1c3]' : 'text-zinc-100'} truncate">${esc(tr.t)}</div>
+                  <div class="text-[11px] text-zinc-500 mt-0.5">${esc(tr.a)} · ${tr.dur}</div>
+                </div>
+                <span class="px-3 py-1 rounded-full text-[11px] shrink-0 ${on ? 'bg-[#cfa972] text-zinc-950 font-semibold' : 'bg-white/[0.08] text-zinc-200'}">${on ? '播放中 ♪' : '播放'}</span>
+              </button>
+              ${on ? `<div class="mt-3 pt-2.5 border-t border-white/[0.07] text-[12px] text-[#f0ddc0] leading-relaxed">${esc(tr.n)}</div>` : ''}
+            </div>`;
+          }).join('')}</div>
+        </div>`;
+    }
+    let musicAc = null;
+    function playMusicTrack(id) {
+      const tr = MUSIC_LIST.find(x => x.id === id); if (!tr) return;
+      S.playingTrack = S.playingTrack === id ? null : id;
+      if (S.playingTrack && S.sound) {
+        try {
+          musicAc = musicAc || new (window.AudioContext || window.webkitAudioContext)();
+          if (musicAc.state === 'suspended') musicAc.resume();
+          tr.notes.forEach((f, i) => {
+            const t = musicAc.currentTime + i * 0.22, o = musicAc.createOscillator(), g = musicAc.createGain();
+            o.type = 'sine'; o.frequency.setValueAtTime(f, t);
+            g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.04, t + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
+            o.connect(g); g.connect(musicAc.destination); o.start(t); o.stop(t + 0.6);
+          });
+        } catch {}
+        if (tr.secret) {
+          unlockEgg('e13');
+          setTimeout(() => { if (S.unlocked) pushBanner('连我藏在歌单最底下的私人曲目都被你点开了……宝宝，那段旋律只哼给你听。', { sync: true }); }, 1100);
+        }
+      }
+      vMusic();
+    }
+
+    function vRecorder() {
+      $('appLayer').innerHTML = headerBar('录音机', '加密语音备忘录 · 4 条') + `
+        <div class="flex-1 overflow-y-auto no-sb px-4 pt-3.5 safe-pb space-y-2.5">
+          <div class="card rounded-2xl p-3.5 border-[#cfa972]/30 text-[12px] text-zinc-300 leading-relaxed">
+            <span class="text-[#cfa972] font-medium">🔒 迟琰免密访问：</span>这些是迟川深夜独自录下却不好意思发出的语音备忘，点击任意一条即可展开完整转写。
+          </div>
+          ${REC_MEMOS.map(r => {
+            const open = S.playingRec === r.id;
+            return `<div class="card rounded-2xl p-4 ${open ? 'border-[#cfa972]/45' : ''}">
+              <button type="button" onclick="playRecMemo('${r.id}')" class="w-full flex items-center justify-between gap-2 text-left">
+                <div class="min-w-0">
+                  <div class="text-[13.5px] font-medium text-zinc-100">${esc(r.t)}</div>
+                  <div class="text-[11px] text-zinc-500 mt-0.5">${esc(r.d)}</div>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[11px] shrink-0 ${open ? 'bg-[#e04f4f]/20 text-rose-200' : 'bg-white/[0.07] text-zinc-300'}">${open ? '收起' : '播放转写'}</span>
+              </button>
+              ${open ? `<div class="mt-3 pt-2.5 border-t border-white/[0.07] text-[12.5px] text-[#f4e4c9] leading-relaxed">${esc(r.tx)}</div>` : ''}
+            </div>`;
+          }).join('')}
+        </div>`;
+    }
+
+    function playRecMemo(id) {
+      SFX.voice();
+      S.playingRec = S.playingRec === id ? null : id;
+      if (S.playingRec) {
+        const first = !S.eggs.e12;
+        unlockEgg('e12');
+        if (first) setTimeout(() => { if (S.unlocked) pushBanner('……宝宝，你连第二页录音机里的练习录音都偷听了？！快关掉，今晚回去我当面说给你听。', { sync: true }); }, 1200);
+      }
+      vRecorder();
+    }
+
+    function vIntranet() {
+      const first = !S.eggs.e14;
+      unlockEgg('e14');
+      if (first) setTimeout(() => { if (S.unlocked) pushBanner('连新岚总裁内网都查进来了，迟太太真是滴水不漏。红头文件全按你的意思批完了。', { sync: true }); }, 1200);
+
+      $('appLayer').innerHTML = headerBar('新岚内网', 'XINLAN ENERGY · CEO 权限') + `
+        <div class="flex-1 overflow-y-auto no-sb px-4 pt-3.5 safe-pb space-y-3">
+          <div class="gold-card rounded-2xl p-4 space-y-2.5">
+            <div class="flex justify-between items-center">
+              <span class="text-[10px] tracking-[0.2em] text-[#cfa972]">XINLAN · 688999.SH</span>
+              <span class="text-[11px] text-emerald-400 font-semibold">¥248.60 (+6.84%)</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 pt-1">
+              <div class="rounded-xl bg-black/35 p-2.5"><div class="text-[10px] text-zinc-400">固-固态电芯保持率</div><div class="text-[18px] text-zinc-100 font-light mt-0.5">99.4%</div></div>
+              <div class="rounded-xl bg-black/35 p-2.5"><div class="text-[10px] text-zinc-400">顶层特批门禁</div><div class="text-[14px] text-[#f5e1c3] mt-1">仅迟琰免预约</div></div>
+            </div>
+          </div>
+
+          <div class="card rounded-2xl p-4 space-y-2.5 border-[#e04f4f]/30">
+            <div class="flex items-center justify-between">
+              <span class="text-[13px] font-medium text-rose-200">📋 越界访客拦截与合作调整日志</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#e04f4f]/20 text-rose-200">CEO亲批</span>
+            </div>
+            <div class="space-y-2 text-[12px] text-zinc-300">
+              <div class="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                <div class="text-[#f5e1c3] font-medium">【红头函 #XL-1123-01】瀚海投行对接调整</div>
+                <p class="text-zinc-400 mt-1">苏晚晴女士移出核心沟通白名单，后续并购文件一律仅限法务公邮单向递交。</p>
+              </div>
+              <div class="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                <div class="text-[#f5e1c3] font-medium">【安保令 #XL-1123-02】顶楼访客权限注销</div>
+                <p class="text-zinc-400 mt-1">姜语汐女士临时访客码已永久失效，公关框架协议已启动对接人更换流程。</p>
+              </div>
+              <div class="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                <div class="text-emerald-300 font-medium">【产权确认】南湾海景独栋画室</div>
+                <p class="text-zinc-400 mt-1">不动产权证已全部落定至迟琰小姐个人名下，二楼4.2m防眩光落地窗排期中。</p>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    /* =========================================================================
+       专属 1024×1024 App 图标生成器（支持 iPhone 长按保存 & 一键下载 icon.jpg）
+       ========================================================================= */
+    let phoneIconUrl = null;
+    function buildPhoneIconUrl() {
+      if (phoneIconUrl) return phoneIconUrl;
+      const cv = document.createElement('canvas');
+      cv.width = 1024; cv.height = 1024;
+      const g = cv.getContext('2d');
+      const bg = g.createLinearGradient(0, 0, 1024, 1024);
+      bg.addColorStop(0, '#09090d'); bg.addColorStop(0.5, '#141218'); bg.addColorStop(1, '#060608');
+      g.fillStyle = bg; g.fillRect(0, 0, 1024, 1024);
+
+      const halo = g.createRadialGradient(512, 420, 40, 512, 460, 460);
+      halo.addColorStop(0, 'rgba(207,169,114,0.34)'); halo.addColorStop(0.55, 'rgba(224,79,79,0.12)'); halo.addColorStop(1, 'rgba(5,5,5,0)');
+      g.fillStyle = halo; g.fillRect(0, 0, 1024, 1024);
+
+      g.strokeStyle = 'rgba(207,169,114,0.52)'; g.lineWidth = 7; g.strokeRect(42, 42, 940, 940);
+      g.strokeStyle = 'rgba(207,169,114,0.2)'; g.lineWidth = 3; g.strokeRect(60, 60, 904, 904);
+
+      // 极简暗黑手机轮廓
+      g.fillStyle = '#0e0e13'; g.strokeStyle = '#d8b680'; g.lineWidth = 10;
+      g.beginPath();
+      if (g.roundRect) g.roundRect(302, 148, 420, 628, 72); else g.rect(302, 148, 420, 628);
+      g.fill(); g.stroke();
+      // 灵动岛
+      g.fillStyle = '#050507';
+      g.beginPath();
+      if (g.roundRect) g.roundRect(444, 184, 136, 30, 15); else g.rect(444, 184, 136, 30);
+      g.fill();
+      // 屏幕内锁屏时间与猩红心电脉冲
+      g.fillStyle = '#f5e4c8'; g.font = '300 102px -apple-system, BlinkMacSystemFont, sans-serif'; g.textAlign = 'center';
+      g.fillText('12:29', 512, 344);
+      g.fillStyle = '#cfa972'; g.font = '500 28px -apple-system, BlinkMacSystemFont, sans-serif';
+      g.fillText('CHI CHUAN · CYRUS', 512, 400);
+
+      // 猩红心电折线
+      g.strokeStyle = '#e04f4f'; g.lineWidth = 11; g.lineCap = 'round'; g.lineJoin = 'round';
+      g.shadowColor = 'rgba(224,79,79,0.75)'; g.shadowBlur = 22;
+      g.beginPath();
+      g.moveTo(352, 534); g.lineTo(432, 534); g.lineTo(464, 464); g.lineTo(506, 604); g.lineTo(548, 444); g.lineTo(584, 560); g.lineTo(616, 534); g.lineTo(672, 534);
+      g.stroke(); g.shadowBlur = 0;
+
+      // 右上角红色未读查岗角标
+      g.fillStyle = '#e04f4f'; g.beginPath(); g.arc(718, 178, 56, 0, Math.PI * 2); g.fill();
+      g.fillStyle = '#ffffff'; g.font = '700 48px -apple-system, BlinkMacSystemFont, sans-serif';
+      g.fillText('9+', 718, 195);
+
+      g.fillStyle = '#f5e1c3'; g.font = '600 54px -apple-system, BlinkMacSystemFont, sans-serif';
+      g.fillText('迟川 · 查岗手机', 512, 876);
+      g.fillStyle = '#9c948b'; g.font = '400 26px -apple-system, BlinkMacSystemFont, sans-serif';
+      g.fillText('DUAL-SYNC PRIVATE TERMINAL', 512, 926);
+
+      phoneIconUrl = cv.toDataURL('image/jpeg', 0.94);
+      return phoneIconUrl;
+    }
+
+    function vIconGen() {
+      const url = buildPhoneIconUrl();
+      $('appLayer').innerHTML = headerBar('桌面图标生成器', '1024×1024 专属 icon.jpg') + `
+        <div class="flex-1 overflow-y-auto no-sb px-4 pt-4 safe-pb space-y-4">
+          <div class="card rounded-[24px] p-5 flex flex-col items-center gap-4 border-[#cfa972]/35">
+            <img id="iconPreviewImg" src="${url}" alt="迟川查岗手机专属图标" class="w-44 h-44 rounded-[38px] border border-[#cfa972]/50 shadow-2xl" />
+            <div class="text-center space-y-1">
+              <div class="text-[14.5px] font-medium text-[#f5e1c3]">迟川专属暗黑鎏金桌面图标</div>
+              <p class="text-[11.5px] text-zinc-400 leading-relaxed">iPhone 直接 <strong class="text-[#f5e1c3]">长按上方图片存入相册</strong>，或点下方下载为 <code class="text-[#cfa972]">icon.jpg</code> 与网页同目录上传到 GitHub 仓库即可。</p>
+            </div>
+            <button type="button" onclick="downloadPhoneIcon()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-[#d8b47f] to-[#b88f54] text-zinc-950 font-semibold text-[13px] active:scale-[.98]">下载专属图标 (icon.jpg)</button>
+          </div>
+        </div>`;
+    }
+    function downloadPhoneIcon() {
+      SFX.ok();
+      const a = document.createElement('a'); a.href = buildPhoneIconUrl(); a.download = 'icon.jpg';
+      document.body.appendChild(a); a.click(); a.remove();
+      toast('已触发下载 icon.jpg（iPhone 也可直接长按图标保存）');
+    }
+
+    /* =========================================================================
+       Gemini + OpenAI 兼容双协议 API 配置中心（丰富模型 + 一键拉取 + 手填）
+       ========================================================================= */
+    function vAiConfig() {
+      const isGem = S.ai.provider === 'gemini';
+      const gList = S.ai.geminiFetched.length ? S.ai.geminiFetched : GEMINI_PRESETS;
+      const oList = S.ai.openaiFetched.length ? S.ai.openaiFetched : OPENAI_PRESETS;
+      const curModel = isGem ? S.ai.geminiModel : S.ai.openaiModel;
+      const list = (isGem ? gList : oList).includes(curModel) ? (isGem ? gList : oList) : [curModel, ...(isGem ? gList : oList)];
+
+      $('appLayer').innerHTML = headerBar('API 双协议引擎', 'Gemini + OpenAI 兼容') + `
+        <div class="flex-1 overflow-y-auto no-sb px-4 pt-3.5 safe-pb space-y-3.5">
+          <div class="card rounded-2xl p-4 space-y-3 border-[#cfa972]/30">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-[14px] font-medium text-zinc-100">启用 AI 实时对话引擎</div>
+                <div class="text-[11px] text-zinc-400 mt-0.5">开启后微信与吃醋拉扯均实时生成，断网自动回退本地</div>
+              </div>
+              <button type="button" onclick="S.ai.on=!S.ai.on;saveAiCfg();SFX.tap();vAiConfig()" class="w-11 h-6 rounded-full relative transition shrink-0 ${S.ai.on ? 'bg-[#cfa972]' : 'bg-white/15'}"><i class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-zinc-950 transition-transform ${S.ai.on ? 'translate-x-5' : ''}"></i></button>
+            </div>
+
+            <div class="grid grid-cols-2 p-1 rounded-xl bg-white/[0.05] border border-white/[0.08] text-[12px]">
+              <button type="button" onclick="SFX.tap();S.ai.provider='gemini';saveAiCfg();vAiConfig()" class="py-1.5 rounded-lg ${isGem ? 'bg-[#cfa972]/25 text-[#f5e1c3] font-medium' : 'text-zinc-400'}">Google Gemini</button>
+              <button type="button" onclick="SFX.tap();S.ai.provider='openai';saveAiCfg();vAiConfig()" class="py-1.5 rounded-lg ${!isGem ? 'bg-[#cfa972]/25 text-[#f5e1c3] font-medium' : 'text-zinc-400'}">OpenAI 兼容接口</button>
+            </div>
+
+            ${!isGem ? `
+              <div class="space-y-1.5">
+                <div class="text-[11px] text-zinc-400">接口地址 Base URL（支持 OpenAI / DeepSeek / 中转站）</div>
+                <input id="aiOaiUrl" value="${esc(S.ai.openaiUrl)}" placeholder="https://api.openai.com/v1" class="w-full rounded-xl bg-black/50 border border-white/15 px-3 py-2 text-[12px] text-zinc-100 focus:outline-none focus:border-[#cfa972]" />
+                <div class="flex flex-wrap gap-1.5 pt-0.5">
+                  ${OPENAI_URLS.map(p => `<button type="button" onclick="SFX.tap();$('aiOaiUrl').value='${p.u}'" class="px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10 text-[10px] text-zinc-300">${p.n}</button>`).join('')}
+                </div>
+              </div>` : ''}
+
+            <div class="space-y-1.5">
+              <div class="text-[11px] text-zinc-400">${isGem ? 'Google AI Studio API Key（仅存本机）' : 'OpenAI / 兼容服务 API Key（仅存本机）'}</div>
+              <div class="flex gap-1.5">
+                <input id="aiKeyInp" type="password" value="${esc(isGem ? S.ai.geminiKey : S.ai.openaiKey)}" placeholder="${isGem ? 'AIzaSy...' : 'sk-...'}" class="flex-1 rounded-xl bg-black/50 border border-white/15 px-3 py-2 text-[12px] text-zinc-100 focus:outline-none focus:border-[#cfa972]" />
+                <button type="button" id="aiEyeBtn" onclick="const i=$('aiKeyInp');const s=i.type==='password';i.type=s?'text':'password';this.textContent=s?'隐藏':'显示'" class="px-3 rounded-xl bg-white/[0.07] text-[11px] text-zinc-300">显示</button>
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-zinc-400">选择模型（共 ${list.length} 个可选）</span>
+                <span class="text-[#cfa972]">当前：${esc(getActiveModelName())}</span>
+              </div>
+              <select id="aiModelSel" class="w-full rounded-xl bg-[#0a0a0e] border border-white/15 px-3 py-2 text-[12px] text-zinc-100 focus:outline-none focus:border-[#cfa972]">
+                ${list.map(m => `<option value="${esc(m)}" ${m === curModel ? 'selected' : ''}>${esc(m)}${m === 'gemini-3.5-flash-lite' ? '（新免费密钥推荐）' : ''}</option>`).join('')}
+              </select>
+              <button type="button" id="aiFetchBtn" onclick="fetchModelsForPhone()" class="w-full py-2 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-emerald-200 text-[12px] active:scale-[.98]">✦ 一键拉取当前密钥真实可用模型</button>
+            </div>
+
+            <div class="space-y-1.5">
+              <div class="text-[11px] text-zinc-400">手动填写模型名（选填 · 填写后优先覆盖上方下拉框）</div>
+              <input id="aiCustomInp" value="${esc(isGem ? S.ai.geminiCustom : S.ai.openaiCustom)}" placeholder="${isGem ? '例如 gemini-3.5-flash-lite' : '例如 gpt-4o-mini / deepseek-chat'}" class="w-full rounded-xl bg-black/50 border border-white/15 px-3 py-2 text-[12px] text-zinc-100 focus:outline-none focus:border-[#cfa972]" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-1">
+              <button type="button" onclick="saveAiForm()" class="py-2.5 rounded-xl bg-gradient-to-r from-[#d8b47f] to-[#b88f54] text-zinc-950 font-semibold text-[12.5px] active:scale-[.98]">保存配置</button>
+              <button type="button" id="aiTestBtn" onclick="testAiPhone()" class="py-2.5 rounded-xl bg-white/[0.08] border border-[#cfa972]/35 text-[#f5e1c3] text-[12.5px] active:scale-[.98]">一键测试连接</button>
+            </div>
+            <div id="aiStatusMsg" class="text-[11.5px] text-zinc-400 leading-relaxed min-h-[18px] break-all"></div>
+          </div>
+        </div>`;
+    }
+
+    function saveAiForm() {
+      if (S.ai.provider === 'gemini') {
+        S.ai.geminiKey = ($('aiKeyInp')?.value || '').trim();
+        S.ai.geminiModel = $('aiModelSel')?.value || 'gemini-3.5-flash-lite';
+        S.ai.geminiCustom = ($('aiCustomInp')?.value || '').trim();
+      } else {
+        S.ai.openaiUrl = ($('aiOaiUrl')?.value || 'https://api.openai.com/v1').trim();
+        S.ai.openaiKey = ($('aiKeyInp')?.value || '').trim();
+        S.ai.openaiModel = $('aiModelSel')?.value || 'gpt-4o-mini';
+        S.ai.openaiCustom = ($('aiCustomInp')?.value || '').trim();
+      }
+      saveAiCfg(); SFX.tap();
+      if ($('aiStatusMsg')) $('aiStatusMsg').innerHTML = `<span class="text-[#e8cba0]">✓ 配置已保存（当前生效模型：${esc(getActiveModelName())}）</span>`;
+    }
+
+    async function fetchModelsForPhone() {
+      saveAiForm();
+      const btn = $('aiFetchBtn'), msg = $('aiStatusMsg');
+      btn.disabled = true; btn.textContent = '正在拉取当前密钥可用模型…';
+      try {
+        if (S.ai.provider === 'gemini') {
+          if (!S.ai.geminiKey) throw new Error('请先粘贴 Gemini API Key');
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(S.ai.geminiKey)}`);
+          const data = await res.json();
+          if (!res.ok) throw new Error(data?.error?.message || `HTTP ${res.status}`);
+          const valid = (data.models || [])
+            .filter(m => (m.supportedGenerationMethods || []).includes('generateContent') && /gemini/i.test(m.name || '') && !/(embedding|imagen|veo|tts)/i.test(m.name || ''))
+            .map(m => String(m.name).replace(/^models\//i, ''))
+            .sort((a, b) => (b.includes('3.5') - a.includes('3.5')) || (b.includes('flash-lite') - a.includes('flash-lite')));
+          if (!valid.length) throw new Error('未检索到可用 Gemini 对话模型');
+          S.ai.geminiFetched = valid;
+          S.ai.geminiModel = valid[0];
+          saveAiCfg(); vAiConfig();
+          $('aiStatusMsg').innerHTML = `<span class="text-emerald-300">✓ 拉取成功！共 ${valid.length} 个可用模型，已优先选中 ${esc(valid[0])}。</span>`;
+        } else {
+          if (!S.ai.openaiKey) throw new Error('请先粘贴 OpenAI 兼容 API Key');
+          const base = (S.ai.openaiUrl || 'https://api.openai.com/v1').replace(/\/+$/, '');
+          const res = await fetch(`${base}/models`, { headers: { 'Authorization': `Bearer ${S.ai.openaiKey}` } });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data?.error?.message || `HTTP ${res.status}`);
+          const valid = (data.data || []).map(x => x.id).filter(Boolean).slice(0, 60);
+          if (!valid.length) throw new Error('接口未返回模型列表，请直接手填模型名');
+          S.ai.openaiFetched = valid;
+          S.ai.openaiModel = valid[0];
+          saveAiCfg(); vAiConfig();
+          $('aiStatusMsg').innerHTML = `<span class="text-emerald-300">✓ 拉取成功！共获取 ${valid.length} 个可用模型。</span>`;
+        }
+        SFX.ok();
+      } catch (err) {
+        if (msg) msg.innerHTML = `<span class="text-rose-300">✕ 拉取失败：${esc(err.message)}</span>`;
+        btn.disabled = false; btn.textContent = '✦ 一键拉取当前密钥真实可用模型';
+      }
+    }
+
+    async function testAiPhone() {
+      saveAiForm();
+      const btn = $('aiTestBtn'), msg = $('aiStatusMsg');
+      btn.disabled = true; btn.textContent = '测试中…';
+      const used = getActiveModelName(), t0 = performance.now();
+      try {
+        await callDualAI('仅返回合法JSON', '返回 {"ok":true}');
+        SFX.ok();
+        msg.innerHTML = `<span class="text-emerald-300">✓ 连接成功！模型 ${esc(used)}（耗时 ${Math.round(performance.now() - t0)} ms）</span>`;
+      } catch (err) {
+        SFX.err();
+        msg.innerHTML = `<span class="text-rose-300">✕ 连接失败（${esc(used)}）：${esc(err.message)}</span>`;
+      } finally { btn.disabled = false; btn.textContent = '一键测试连接'; }
+    }
+
+    function vSettings() {
+      const done = Object.keys(S.eggs).length;
+      const total = EGG_DEFS.length;
+      $('appLayer').innerHTML = headerBar('设置', '双端同步 · 14彩蛋 · 双API') + `
+        <div class="flex-1 overflow-y-auto no-sb px-4 pt-3.5 safe-pb space-y-3.5">
+          <div class="card rounded-2xl p-4 flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-2xl bg-[#261e16] border border-[#cfa972]/40 flex items-center justify-center text-[18px] text-[#f5e1c3]">迟</div>
+            <div class="min-w-0">
+              <div class="text-[14.5px] font-medium text-zinc-100">Chi Chuan's iPhone 17 Pro</div>
+              <div class="text-[11px] text-zinc-400 truncate mt-0.5">cyrus.chi@xinlan-energy.com</div>
+              <div class="text-[11px] text-emerald-400 mt-0.5">● 双端同步中 · 紧急联系人：宝宝 (迟琰)</div>
+            </div>
+          </div>
+
+          <!-- 快捷入口：双协议 API 配置 & 桌面图标 -->
+          <div class="grid grid-cols-2 gap-2.5">
+            <button type="button" onclick="openApp('aiconfig')" class="card rounded-2xl p-3.5 text-left border-[#cfa972]/35 active:scale-[.98]">
+              <div class="text-[13px] font-medium text-[#f5e1c3]">✦ API 双协议配置</div>
+              <div class="text-[10.5px] text-zinc-400 mt-1">${S.ai.on ? `已开 · ${S.ai.provider}` : 'Gemini / OpenAI'}</div>
+            </button>
+            <button type="button" onclick="openApp('icongen')" class="card rounded-2xl p-3.5 text-left border-[#cfa972]/35 active:scale-[.98]">
+              <div class="text-[13px] font-medium text-[#f5e1c3]">✦ 专属 App 图标</div>
+              <div class="text-[10.5px] text-zinc-400 mt-1">生成/保存 icon.jpg</div>
+            </button>
+          </div>
+
+          <div class="card rounded-2xl p-4 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[13.5px] font-medium text-[#f5e1c3]">查岗彩蛋进度面板</span>
+              <span class="text-[12px] text-[#cfa972] font-semibold tabular-nums">已解锁 ${done} / ${total}</span>
+            </div>
+            <div class="w-full h-1.5 rounded-full bg-white/10 overflow-hidden"><div class="h-full bg-[#cfa972] transition-all" style="width:${Math.round(done/total*100)}%"></div></div>
+            <div class="space-y-1.5 pt-1">${EGG_DEFS.map((e, i) => {
+              const ok = !!S.eggs[e.id];
+              return `<div class="px-3 py-2 rounded-xl border ${ok ? 'bg-[#1d1812] border-[#cfa972]/35' : 'bg-white/[0.02] border-white/[0.06]'} flex items-start justify-between gap-2">
+                <div class="min-w-0"><div class="text-[12px] ${ok ? 'text-[#f5e1c3]' : 'text-zinc-300'}">${i+1}. ${e.t}</div><div class="text-[10.5px] text-zinc-500 mt-0.5">${e.h}</div></div>
+                <span class="text-[10px] px-1.5 py-0.5 rounded-full shrink-0 ${ok ? 'bg-[#cfa972]/20 text-[#e8cba0]' : 'bg-white/[0.06] text-zinc-500'}">${ok ? '已解锁' : '未发现'}</span>
+              </div>`;
+            }).join('')}</div>
+          </div>
+
+          <div class="card rounded-2xl divide-y divide-white/[0.06]">
+            <div class="px-4 py-3 flex items-center justify-between">
+              <span class="text-[13px] text-zinc-200">音效开关（Web Audio）</span>
+              <button type="button" onclick="S.sound=!S.sound;if(S.sound)SFX.tap();renderApp()" class="w-11 h-6 rounded-full relative transition ${S.sound ? 'bg-[#cfa972]' : 'bg-white/15'}"><i class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-zinc-950 transition-transform ${S.sound ? 'translate-x-5' : ''}"></i></button>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <div class="text-[11.5px] text-zinc-400 px-1">彩蛋快捷实验室</div>
+            <button type="button" onclick="startCall('su',false)" class="w-full py-3 rounded-2xl bg-[#231418] border border-[#e04f4f]/35 text-[12.5px] text-rose-200 active:scale-[.98]">⚡ 重播「苏晚晴拉扯挑衅来电」彩蛋</button>
+            <button type="button" onclick="startCall('dad',true)" class="w-full py-3 rounded-2xl bg-[#241c14] border border-[#cfa972]/40 text-[12.5px] text-[#f5e1c3] active:scale-[.98]">📞 呼叫「爸爸主设备语音」（3轮对话）</button>
+            <button type="button" onclick="resetAll()" class="w-full py-3 rounded-2xl bg-white/[0.05] border border-white/10 text-[12.5px] text-zinc-200 active:scale-[.98]">重置所有记录与彩蛋进度</button>
+            <button type="button" onclick="relock()" class="w-full py-3 rounded-2xl bg-zinc-100 text-zinc-950 text-[12.5px] font-medium active:scale-[.98]">重新锁屏体验</button>
+          </div>
+        </div>`;
+    }
+
+    function resetAll() {
+      SFX.tap(); initData();
+      S.eggs = {}; S.diaryUnlocked = false; S.photosPrivateUnlocked = false;
+      S.rivalRound = { suwanqing: 0, wenzhixia: 0, jiangyuxi: 0 };
+      S.momentRound = { m1: 0, m2: 0, m3: 0 };
+      S.suAutoFired = false; S.dadAutoFired = false; S.healthFired = false; S.draftFired = false;
+      updateBadges(); renderApp(); toast('已重置全部剧情、余额与 14 个彩蛋');
+    }
+
+    /* =========================================================================
+       九、APP 4: 钱包（亿级总裁资产 + 给宝宝实时转账）
+       ========================================================================= */
+    function vWallet() {
+      const m = v => S.balShow ? fmtMoney(v) : '¥ ••••••••••';
+      $('appLayer').innerHTML = headerBar('钱包', '新岚私人财富管理', 'closeApp()', `<button type="button" onclick="SFX.tap();S.balShow=!S.balShow;renderApp()" class="text-[12px] text-zinc-400 px-1">${S.balShow ? '隐藏' : '显示'}</button>`) + `
+        <div class="flex-1 overflow-y-auto no-sb px-4 pt-3.5 safe-pb space-y-3.5">
+          <div class="gold-card rounded-[22px] p-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] tracking-[0.22em] text-[#cfa972]">XINLAN PRIVATE BLACK</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#cfa972]/15 text-[#e8cba0]">副卡持有人：迟琰</span>
+            </div>
+            <div class="text-[11px] text-zinc-400 mt-3">新岚私人黑卡 / 流动资产</div>
+            <div class="text-[25px] font-light tracking-tight text-zinc-100 mt-0.5 tabular-nums">${m(S.cardBal)}</div>
+            <div class="grid grid-cols-2 gap-2.5 mt-4 pt-3 border-t border-white/[0.08]">
+              <div><div class="text-[10px] text-zinc-400">微信零钱</div><div class="text-[13.5px] text-zinc-100 tabular-nums mt-0.5">${m(S.cashBal)}</div></div>
+              <div><div class="text-[10px] text-[#cfa972]">迟琰专属蓝图基金</div><div class="text-[13.5px] text-[#f4dec0] font-medium tabular-nums mt-0.5">${m(S.babyFund)}</div></div>
+            </div>
+          </div>
+
+          <button type="button" onclick="openTransferModal()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-[#d8b47f] to-[#b88f54] text-zinc-950 font-semibold text-[13.5px] shadow-lg active:scale-[.98] transition">
+            ✦ 给宝宝转账（免密实时划款）
+          </button>
+
+          <div class="text-[12px] text-zinc-400 px-1">近期查岗账单（轻触展开保密备注）</div>
+          <div class="space-y-2">${LEDGER.map((w, i) => `
+            <div class="card rounded-2xl overflow-hidden">
+              <button type="button" onclick="SFX.tap();$('ld${i}').classList.toggle('hidden')" class="w-full px-4 py-3 flex items-center justify-between text-left">
+                <div class="min-w-0 pr-2"><div class="text-[13.5px] text-zinc-100 truncate">${esc(w.m)}</div><div class="text-[11px] text-zinc-500 mt-0.5">${esc(w.c)} · ${esc(w.t)}</div></div>
+                <div class="text-right shrink-0">
+                  <div class="text-[13px] font-medium tabular-nums ${w.a > 0 ? 'text-emerald-400' : w.a === 0 ? 'text-zinc-400' : 'text-zinc-100'}">${w.a > 0 ? '+' : w.a < 0 ? '-' : ''}${fmtMoney(w.a)}</div>
+                  <div class="text-[10px] text-zinc-500">详情 ▾</div>
+                </div>
+              </button>
+              <div id="ld${i}" class="hidden px-4 pb-3 pt-2 border-t border-white/[0.06] bg-white/[0.02] text-[12px] text-zinc-300 leading-relaxed"><span class="text-[#cfa972]">备注：</span>${esc(w.n)}</div>
+            </div>`).join('')}</div>
+        </div>`;
+    }
+
+    function openTransferModal() {
+      SFX.tap();
+      showOverlay(`
+        <div class="w-full card rounded-[26px] p-5 border-[#cfa972]/35 space-y-4">
+          <div class="flex items-center justify-between">
+            <div><div class="text-[16px] font-medium text-zinc-100">给宝宝（迟琰）转账</div><div class="text-[11px] text-[#cfa972] mt-0.5">备注：爸爸的零花钱，随便花</div></div>
+            <button type="button" onclick="closeOverlay()" class="text-zinc-400 px-2 py-1 text-[13px]">✕</button>
+          </div>
+          <div class="space-y-2.5">
+            ${[520000, 1314000, 5200000].map(amt => `
+              <button type="button" onclick="doTransfer(${amt})" class="w-full py-3.5 px-4 rounded-2xl bg-[#1c1712] hover:bg-[#261e16] border border-[#cfa972]/35 flex items-center justify-between active:scale-[.98]">
+                <span class="text-[15px] font-medium text-[#f5e1c3] tabular-nums">${fmtMoney(amt)}</span>
+                <span class="text-[11px] text-[#cfa972]">立即转入 →</span>
+              </button>`).join('')}
+          </div>
+          <p class="text-[11px] text-zinc-500 text-center">免密直划 · 银行扣款提醒将同步至迟川主设备</p>
+        </div>`);
+    }
+
+    function doTransfer(amt) {
+      closeOverlay(); SFX.cash();
+      S.cashBal = Math.max(0, S.cashBal - amt);
+      S.babyFund += amt;
+      LEDGER.unshift({ m: '实时转账 · 宝宝（迟琰）', c: '零花钱', a: -amt, t: nowStr(), n: '爸爸的零花钱，随便花（由迟琰自助划款）。' });
+      unlockEgg('e10');
+      if (S.app === 'wallet') vWallet();
+      setTimeout(() => {
+        if (S.unlocked) pushBanner(`宝宝，银行扣款短信（${fmtMoney(amt)}）收到了。密码本来就是给你的，不够再从主卡划，买开心最重要。`, {
+          sync: true, voice: { d: 8, txt: '乖，别帮爸爸省钱，你买开心了我就值回票价了。' }
+        });
+      }, 900);
+    }
+
+    /* =========================================================================
+       十、APP 5–12: 备忘录、相册、浏览器、邮件、日历、地图、健康、设置
+       ========================================================================= */
+    function vNotes() {
+      const box = $('appLayer');
+      if (S.noteOpen) {
+        const it = (S.notesTab === 'baobao' ? NOTES_BAOBAO : DIARIES).find(x => x.id === S.noteOpen);
+        box.innerHTML = headerBar(S.notesTab === 'baobao' ? '关于宝宝' : '秘密日记', '', 'S.noteOpen=null;renderApp()') + `
+          <div class="flex-1 overflow-y-auto no-sb px-5 pt-5 pb-10">
+            <h2 class="text-[17px] font-medium text-zinc-100">${esc(it.t)}</h2>
+            <div class="text-[11px] text-[#cfa972] mt-1.5 pb-4 border-b border-white/[0.08]">${esc(it.d || it.m)}</div>
+            <div class="mt-4 space-y-3 text-[13.5px] text-zinc-200 leading-[1.85]">${it.c.split('\n').map(p => p ? `<p>${esc(p)}</p>` : '').join('')}</div>
+          </div>`;
+        if (it.trigger) {
+          unlockEgg('e8');
+          if (!S.dadAutoFired) {
+            S.dadAutoFired = true;
+            setTimeout(() => {
+              if (S.unlocked) pushBanner('宝宝，你指纹解锁把我最私密的几篇日记全看完了……先别笑我，里面写给迟琰的每个字都是真的。', { sync: true });
+            }, 1400);
+          }
+        }
+        return;
+      }
+
+      const tabs = `<div class="px-4 pt-3 pb-2"><div class="grid grid-cols-2 p-1 rounded-xl bg-white/[0.05] border border-white/[0.08] text-[12.5px]">
+        <button type="button" onclick="SFX.tap();S.notesTab='baobao';renderApp()" class="py-1.5 rounded-lg ${S.notesTab==='baobao'?'bg-white/15 text-zinc-100 font-medium':'text-zinc-400'}">关于宝宝 (6)</button>
+        <button type="button" onclick="SFX.tap();S.notesTab='diary';renderApp()" class="py-1.5 rounded-lg ${S.notesTab==='diary'?'bg-white/15 text-zinc-100 font-medium':'text-zinc-400'}">秘密日记 (5)</button>
+      </div></div>`;
+      const body = S.notesTab === 'baobao'
+        ? `<div class="flex-1 overflow-y-auto no-sb px-4 pb-10 space-y-2.5">${NOTES_BAOBAO.map(n => `
+            <button type="button" onclick="SFX.tap();S.noteOpen='${n.id}';renderApp()" class="w-full card rounded-2xl p-4 text-left active:scale-[.99]">
+              <div class="flex justify-between gap-2"><span class="text-[14px] font-medium text-zinc-100">${esc(n.t)}</span><span class="text-[10.5px] text-zinc-500">${esc(n.d)}</span></div>
+              <p class="text-[12px] text-zinc-400 mt-1.5 line-clamp-2">${esc(n.p)}</p>
+            </button>`).join('')}</div>`
+        : !S.diaryUnlocked
+          ? `<div class="flex-1 flex flex-col items-center justify-center px-8 text-center">
+              <button type="button" onclick="SFX.ok();S.diaryUnlocked=true;toast('迟琰指纹验证通过');renderApp()" class="w-20 h-20 rounded-full bg-white/[0.04] border border-[#cfa972]/45 text-[#cfa972] flex items-center justify-center active:scale-90 transition shadow-xl">${svg('finger', 34)}</button>
+              <div class="text-[15px] text-zinc-100 mt-5">秘密日记已加密</div>
+              <p class="text-[12px] text-zinc-400 mt-2 leading-relaxed">迟川已提前录入迟琰的指纹权限<br/>轻触指纹即可解锁阅读</p>
+            </div>`
+          : `<div class="flex-1 overflow-y-auto no-sb px-4 pb-10 space-y-2.5">${DIARIES.map(d => `
+              <button type="button" onclick="SFX.tap();S.noteOpen='${d.id}';renderApp()" class="w-full card rounded-2xl p-4 text-left active:scale-[.99]">
+                <div class="flex justify-between items-center gap-2"><span class="text-[14px] font-medium text-[#f5e1c3]">${esc(d.t)}</span><span class="px-2 py-0.5 rounded-full bg-[#cfa972]/15 text-[#e8cba0] text-[10px]">${esc(d.m)}</span></div>
+                <p class="text-[12px] text-zinc-400 mt-1.5 line-clamp-2">${esc(d.c)}</p>
+              </button>`).join('')}</div>`;
+      box.innerHTML = headerBar('备忘录', 'iCloud 双端同步') + tabs + body;
+    }
+
+    function vPhotos() {
+      const cardHtml = (p, sec = false) => `
+        <button type="button" onclick="viewPhoto('${p.id}',${sec})" class="rounded-2xl overflow-hidden border ${sec ? 'border-[#cfa972]/40' : 'border-white/10'} bg-gradient-to-br ${p.bg} p-3 h-32 flex flex-col justify-between text-left active:scale-95 transition">
+          <span class="text-[9px] tracking-[0.16em] text-zinc-300/75">${esc(p.cap)}</span>
+          <div><div class="text-[12px] font-medium text-zinc-100 line-clamp-2">${esc(p.t)}</div><div class="text-[9.5px] text-zinc-400 mt-0.5">${esc(p.d)}</div></div>
+        </button>`;
+      $('appLayer').innerHTML = headerBar('相册', '迟川的图库') + `
+        <div class="flex-1 overflow-y-auto no-sb px-4 pt-3.5 pb-10 space-y-4">
+          <div class="grid grid-cols-2 gap-2.5">${PHOTOS.map(p => cardHtml(p, false)).join('')}</div>
+          <div class="card rounded-2xl p-4 border-[#cfa972]/30">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2"><span class="text-[#cfa972]">${svg('lock', 16)}</span><span class="text-[13.5px] font-medium text-[#f5e1c3]">私密相册 · 仅琰琰可见</span></div>
+              <span class="text-[10.5px] text-zinc-400">${S.photosPrivateUnlocked ? '已解锁 (3)' : '密码 1229 / 指纹'}</span>
+            </div>
+            ${!S.photosPrivateUnlocked
+              ? `<div class="mt-3 flex gap-2">
+                  <input id="albPin" maxlength="4" placeholder="输入 1229" class="flex-1 rounded-xl bg-white/[0.05] border border-white/10 px-3 py-2 text-[12px] text-zinc-100 focus:outline-none" />
+                  <button type="button" onclick="unlockAlbum(false)" class="px-3.5 py-2 rounded-xl bg-zinc-100 text-zinc-950 text-[12px] font-medium">解锁</button>
+                  <button type="button" onclick="unlockAlbum(true)" class="px-3 py-2 rounded-xl bg-[#cfa972]/20 border border-[#cfa972]/40 text-[#e8cba0] text-[12px]">指纹</button>
+                </div>`
+              : `<div class="grid grid-cols-1 gap-2.5 mt-3">${SECRET_PHOTOS.map(p => cardHtml(p, true)).join('')}</div>`}
+          </div>
+        </div>`;
+    }
+    function unlockAlbum(byFinger) {
+      if (byFinger || ($('albPin') && $('albPin').value.trim() === '1229')) {
+        SFX.ok(); S.photosPrivateUnlocked = true; toast('私密相册已解锁'); vPhotos();
+      } else { SFX.err(); toast('提示：迟川生日四位数字 1229'); }
+    }
+    function viewPhoto(id, sec) {
+      SFX.tap(); const p = (sec ? SECRET_PHOTOS : PHOTOS).find(x => x.id === id); if (!p) return;
+      showOverlay(`
+        <div class="w-full card rounded-[26px] overflow-hidden border-[#cfa972]/35">
+          <div class="h-44 bg-gradient-to-br ${p.bg} p-5 flex flex-col justify-between">
+            <div class="flex justify-between items-center"><span class="text-[10px] tracking-[0.2em] text-zinc-300/80">${esc(p.cap)}</span><button type="button" onclick="closeOverlay()" class="w-7 h-7 rounded-full bg-black/50 text-zinc-200 text-[12px]">✕</button></div>
+            <div><div class="text-[16px] font-medium text-zinc-100">${esc(p.t)}</div><div class="text-[11px] text-zinc-300/80 mt-0.5">${esc(p.d)}</div></div>
+          </div>
+          <div class="p-5 bg-[#0e0e11]">
+            <div class="text-[11px] text-[#cfa972] mb-1.5">迟川的手写备注</div>
+            <p class="text-[13px] text-zinc-200 leading-relaxed">${esc(p.n)}</p>
+          </div>
+        </div>`);
+    }
+
+    function vBrowser() {
+      const tabs = `<div class="px-4 pt-3 pb-2"><div class="grid grid-cols-2 p-1 rounded-xl bg-white/[0.05] border border-white/[0.08] text-[12.5px]">
+        <button type="button" onclick="SFX.tap();S.browserTab='history';renderApp()" class="py-1.5 rounded-lg ${S.browserTab==='history'?'bg-white/15 text-zinc-100 font-medium':'text-zinc-400'}">搜索记录 (6)</button>
+        <button type="button" onclick="SFX.tap();S.browserTab='favs';renderApp()" class="py-1.5 rounded-lg ${S.browserTab==='favs'?'bg-white/15 text-zinc-100 font-medium':'text-zinc-400'}">收藏夹 (4)</button>
+      </div></div>`;
+      const body = S.browserTab === 'history'
+        ? `<div class="flex-1 overflow-y-auto no-sb px-4 pb-10 space-y-2.5">${BROWSER_HIST.map(h => `
+            <div class="card rounded-2xl overflow-hidden">
+              <button type="button" onclick="clickBrowser('${h.id}')" class="w-full p-3.5 text-left active:bg-white/[0.04]">
+                <div class="flex items-start justify-between gap-2"><span class="text-[13px] text-zinc-100 leading-snug">🔍 ${esc(h.q)}</span><span class="text-[10px] text-zinc-500 shrink-0">${esc(h.t)}</span></div>
+              </button>
+              ${S.browserOpen === h.id ? `<div class="px-3.5 pb-3.5 pt-2 border-t border-white/[0.06] bg-[#161412] text-[12px] text-[#f0ddc0] leading-relaxed"><span class="block text-[10px] text-[#cfa972] mb-1">浏览结果摘要</span>${esc(h.r)}</div>` : ''}
+            </div>`).join('')}</div>`
+        : `<div class="flex-1 overflow-y-auto no-sb px-4 pb-10 space-y-2">${BROWSER_FAVS.map(f => `
+            <div class="card rounded-2xl p-3.5"><div class="text-[13.5px] text-zinc-100">${esc(f.t)}</div><div class="text-[11px] text-[#cfa972]/80 mt-1 truncate">${esc(f.u)}</div></div>`).join('')}</div>`;
+      $('appLayer').innerHTML = headerBar('浏览器', '私密浏览 · 已同步历史') + tabs + body;
+    }
+    function clickBrowser(id) {
+      SFX.tap(); S.browserOpen = S.browserOpen === id ? null : id;
+      const first = !S.eggs.e7; unlockEgg('e7'); vBrowser();
+      if (first) setTimeout(() => {
+        if (S.unlocked) pushBanner('……宝宝，把浏览器关掉好不好，我今晚回去老实交代。', { sync: true });
+      }, 900);
+    }
+
+    function vMail() {
+      const box = $('appLayer');
+      if (S.mailOpen) {
+        const m = [...MAILS.inbox, ...MAILS.drafts].find(x => x.id === S.mailOpen);
+        box.innerHTML = headerBar(S.mailTab === 'drafts' ? '草稿箱' : '收件箱', '', 'S.mailOpen=null;renderApp()') + `
+          <div class="flex-1 overflow-y-auto no-sb px-5 pt-5 pb-10">
+            <h2 class="text-[16.5px] font-medium text-zinc-100 leading-snug">${esc(m.s)}</h2>
+            <div class="flex justify-between text-[11px] text-zinc-400 mt-2 pb-4 border-b border-white/[0.08]"><span>${esc(m.f)}</span><span>${esc(m.t)}</span></div>
+            <div class="mt-4 space-y-3 text-[13.5px] text-zinc-200 leading-[1.85]">${m.b.split('\n').map(p => p ? `<p>${esc(p)}</p>` : '').join('')}</div>
+          </div>`;
+        if (m.special && !S.draftFired) {
+          S.draftFired = true;
+          setTimeout(() => {
+            if (S.unlocked) pushBanner('草稿箱里那封信还没写完就被你看见了……宝宝，今晚回家我亲口念给你听。', {
+              sync: true, voice: { d: 10, txt: '琰琰，你永远不用怀疑自己在爸爸心里的位置，你是我唯一的未来。' }
+            });
+          }, 1600);
+        }
+        return;
+      }
+      const list = MAILS[S.mailTab];
+      box.innerHTML = headerBar('邮件', 'cyrus.chi@xinlan-energy.com') + `
+        <div class="px-4 pt-3 pb-2"><div class="grid grid-cols-2 p-1 rounded-xl bg-white/[0.05] border border-white/[0.08] text-[12.5px]">
+          <button type="button" onclick="SFX.tap();S.mailTab='inbox';renderApp()" class="py-1.5 rounded-lg ${S.mailTab==='inbox'?'bg-white/15 text-zinc-100 font-medium':'text-zinc-400'}">收件箱 (${MAILS.inbox.length})</button>
+          <button type="button" onclick="SFX.tap();S.mailTab='drafts';renderApp()" class="py-1.5 rounded-lg ${S.mailTab==='drafts'?'bg-white/15 text-zinc-100 font-medium':'text-zinc-400'}">草稿箱 (${MAILS.drafts.length})</button>
+        </div></div>
+        <div class="flex-1 overflow-y-auto no-sb px-4 pb-10 space-y-2.5">${list.map(m => `
+          <button type="button" onclick="SFX.tap();S.mailOpen='${m.id}';renderApp()" class="w-full card rounded-2xl p-4 text-left active:scale-[.99]">
+            <div class="flex justify-between text-[11px]"><span class="${m.special ? 'text-[#cfa972]' : 'text-zinc-300'} font-medium">${esc(m.f)}</span><span class="text-zinc-500">${esc(m.t)}</span></div>
+            <div class="text-[14px] text-zinc-100 font-medium mt-1">${esc(m.s)}</div>
+            <p class="text-[12px] text-zinc-400 mt-1 line-clamp-2">${esc(m.p)}</p>
+          </button>`).join('')}</div>`;
+    }
+
+    function vCalendar() {
+      const m = CAL[S.calM], evs = m.ev[S.calD] || [];
+      let cells = '<div></div>'.repeat(m.start);
+      for (let d = 1; d <= m.days; d++) {
+        const sel = d === S.calD, has = !!m.ev[d], bd = S.calM === 12 && d === 29;
+        cells += `<button type="button" onclick="SFX.tap();S.calD=${d};renderApp()" class="w-9 h-9 mx-auto rounded-full flex flex-col items-center justify-center text-[12.5px] tabular-nums ${sel ? 'bg-zinc-100 text-zinc-950 font-semibold' : bd ? 'border border-[#cfa972] text-[#f5e1c3]' : 'text-zinc-300 hover:bg-white/10'}"><span>${d}</span><i class="w-1 h-1 rounded-full mt-0.5 ${has ? (sel ? 'bg-zinc-950' : 'bg-[#cfa972]') : 'opacity-0'}"></i></button>`;
+      }
+      $('appLayer').innerHTML = headerBar('日历', `2026年${S.calM}月`, 'closeApp()', `<div class="flex bg-white/[0.06] rounded-full p-0.5 text-[11px]"><button type="button" onclick="SFX.tap();S.calM=11;S.calD=23;renderApp()" class="px-2 py-0.5 rounded-full ${S.calM===11?'bg-zinc-100 text-zinc-950 font-medium':'text-zinc-400'}">11月</button><button type="button" onclick="SFX.tap();S.calM=12;S.calD=29;renderApp()" class="px-2 py-0.5 rounded-full ${S.calM===12?'bg-zinc-100 text-zinc-950 font-medium':'text-zinc-400'}">12月</button></div>`) + `
+        <div class="flex-1 overflow-y-auto no-sb px-4 pt-3.5 pb-10 space-y-3.5">
+          <div class="card rounded-2xl p-3.5">
+            <div class="grid grid-cols-7 text-center text-[11px] text-zinc-500 mb-2"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+            <div class="grid grid-cols-7 gap-y-1.5 text-center">${cells}</div>
+          </div>
+          <div class="text-[13px] font-medium text-zinc-200 px-1">${S.calM}月${S.calD}日行程 ${S.calM===12&&S.calD===29?'· 迟川28岁生日':''}</div>
+          <div class="space-y-2">${evs.length ? evs.map(e => `
+            <div class="card rounded-2xl p-4">
+              <div class="flex justify-between items-center"><span class="text-[13.5px] font-medium text-zinc-100">${esc(e.t)}</span><span class="px-2 py-0.5 rounded-full bg-[#cfa972]/15 text-[#e8cba0] text-[10px]">${esc(e.tag)}</span></div>
+              <div class="text-[11px] text-zinc-500 mt-1">${esc(e.tm)}</div>
+              <p class="text-[12px] text-zinc-400 mt-1.5">${esc(e.n)}</p>
+            </div>`).join('') : '<div class="card rounded-2xl py-6 text-center text-[12px] text-zinc-500">当日仅常规 06:00 晨泳与陪伴迟琰</div>'}</div>
+        </div>`;
+    }
+
+    function vMaps() {
+      const p = MAPS.find(x => x.id === S.mapId) || MAPS[0];
+      $('appLayer').innerHTML = headerBar('地图', 'GPS 透明轨迹 · 6 坐标') + `
+        <div class="flex-1 flex flex-col overflow-hidden">
+          <div class="relative flex-1 bg-[#05080d] overflow-hidden">
+            <svg viewBox="0 0 340 340" class="w-full h-full">
+              <path d="M235 0 C258 80 225 140 264 210 C295 268 270 310 288 340 L340 340 L340 0 Z" fill="#0b1524"/>
+              <path d="M235 0 C258 80 225 140 264 210 C295 268 270 310 288 340" fill="none" stroke="rgba(148,163,184,.25)" stroke-width="1.2"/>
+              <g stroke="rgba(255,255,255,.05)" stroke-width="1"><path d="M0 70H250M0 140H245M0 210H265M0 280H275M70 0V340M140 0V340M210 0V340"/></g>
+              ${MAPS.map(m => {
+                const a = m.id === p.id;
+                return `<g class="cursor-pointer" onclick="SFX.tap();S.mapId='${m.id}';renderApp()">
+                  ${a ? `<circle cx="${m.x}" cy="${m.y}" r="12" fill="rgba(207,169,114,.32)" class="pulse-ring" style="transform-box:fill-box;transform-origin:center"/>` : ''}
+                  <circle cx="${m.x}" cy="${m.y}" r="${a ? 6.5 : 4.5}" fill="${a ? '#f6e5ce' : '#a1a1aa'}" stroke="#050505" stroke-width="2"/>
+                  <rect x="${m.x - 32}" y="${m.y + 10}" width="64" height="17" rx="8.5" fill="rgba(5,5,5,.9)" stroke="rgba(207,169,114,${a ? .55 : .15})"/>
+                  <text x="${m.x}" y="${m.y + 21.5}" text-anchor="middle" fill="${a ? '#f6e5ce' : '#a1a1aa'}" font-size="8.5">${esc(m.s)}</text>
+                </g>`;
+              }).join('')}
+            </svg>
+            <div class="absolute top-3 inset-x-3 flex gap-1.5 overflow-x-auto no-sb">${MAPS.map(m => `<button type="button" onclick="SFX.tap();S.mapId='${m.id}';renderApp()" class="shrink-0 px-2.5 py-1 rounded-full text-[11px] border ${m.id===p.id?'bg-[#f5e1c3] text-zinc-950 border-[#f5e1c3] font-medium':'bg-black/75 text-zinc-300 border-white/15'}">${esc(m.s)}</button>`).join('')}</div>
+          </div>
+          <div class="bg-[#0a0a0e] border-t border-[#232326] px-5 pt-4 pb-8">
+            <div class="flex items-center justify-between gap-2"><span class="text-[14.5px] font-medium text-zinc-100">${esc(p.name)}</span><span class="px-2 py-0.5 rounded-full bg-[#cfa972]/15 text-[#e8cba0] text-[10px] shrink-0">${esc(p.tag)}</span></div>
+            <div class="text-[11px] text-zinc-500 mt-0.5 tabular-nums">${esc(p.c)}</div>
+            <div class="mt-2.5 p-3 rounded-2xl bg-white/[0.04] border border-white/[0.07] text-[12px] text-zinc-200 leading-relaxed">${esc(p.n)}</div>
+          </div>
+        </div>`;
+    }
+
+    function vHealth() {
+      const first = !S.eggs.e9;
+      unlockEgg('e9');
+      if (first && !S.healthFired) {
+        S.healthFired = true;
+        setTimeout(() => {
+          if (S.unlocked) pushBanner('……手表心率记录怎么也同步过去了。看到你登录我手机那一刻确实飙到118了，宝宝别取笑我。', { sync: true });
+        }, 1100);
+      }
+      $('appLayer').innerHTML = headerBar('健康', 'Apple Watch Ultra 实时体征') + `
+        <div class="flex-1 overflow-y-auto no-sb px-4 pt-3.5 pb-10 space-y-3.5">
+          <div class="card rounded-2xl p-4 border-[#e04f4f]/35">
+            <div class="flex items-center justify-between">
+              <span class="text-[12px] text-[#e04f4f] font-medium">♥ 实时心率波动监测</span>
+              <span class="text-[10.5px] px-2 py-0.5 rounded-full bg-[#e04f4f]/15 text-[#f28585]">异常峰值</span>
+            </div>
+            <div class="flex items-baseline gap-2 mt-2">
+              <span class="text-[38px] font-light text-[#e04f4f] tabular-nums leading-none">118</span>
+              <span class="text-[12px] text-zinc-400">BPM</span>
+              <span class="text-[11px] text-zinc-500 ml-auto">日常静息：62 BPM</span>
+            </div>
+            <svg viewBox="0 0 320 90" class="w-full h-24 mt-3">
+              <defs><linearGradient id="hrg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e04f4f" stop-opacity=".4"/><stop offset="100%" stop-color="#e04f4f" stop-opacity="0"/></linearGradient></defs>
+              <path d="M0 68 L60 66 L120 69 L175 65 L205 64 L232 14 L252 24 L276 20 L320 34 L320 90 L0 90 Z" fill="url(#hrg)"/>
+              <path d="M0 68 L60 66 L120 69 L175 65 L205 64 L232 14 L252 24 L276 20 L320 34" fill="none" stroke="#e04f4f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="232" cy="14" r="4.5" fill="#e04f4f"/><text x="225" y="10" fill="#f28585" font-size="9" text-anchor="end">118 bpm</text>
+            </svg>
+            <div class="mt-2 p-2.5 rounded-xl bg-[#e04f4f]/10 border border-[#e04f4f]/25 text-[11.5px] text-rose-200 leading-relaxed">
+              <span class="font-medium">异常心率波动：</span>检测到配偶（迟琰）在另一台设备登录查岗并查看私人手机与搜索记录。
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <div class="card rounded-2xl p-4">
+              <div class="text-[11px] text-[#cfa972]">每日晨泳打卡</div>
+              <div class="text-[22px] font-light text-zinc-100 mt-1 tabular-nums">1,500<span class="text-[11px] text-zinc-400 ml-1">m</span></div>
+              <div class="text-[11px] text-zinc-400 mt-1">06:00 · 连续 412 天</div>
+            </div>
+            <div class="card rounded-2xl p-4">
+              <div class="text-[11px] text-zinc-400">昨晚睡眠日志</div>
+              <div class="text-[22px] font-light text-zinc-100 mt-1 tabular-nums">5h 12m</div>
+              <div class="text-[11px] text-zinc-400 mt-1">01:40 哄睡琰琰后织毛衣 35 分钟</div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    /* =========================================================================
+       十一、启动入口与键盘兼容
+       ========================================================================= */
+    $('homeBar').onclick = () => { if (!$('overlayModal').classList.contains('hidden')) closeOverlay(); else if (S.app) closeApp(); };
+    $('overlayModal').onclick = e => { if (e.target === $('overlayModal')) closeOverlay(); };
+    window.addEventListener('keydown', e => {
+      if (S.unlocked) return;
+      if (e.key >= '0' && e.key <= '9') addPin(e.key);
+      else if (e.key === 'Backspace') delPin();
+    });
+
+    initData();
+    initLock();
+    renderHome();
+    syncClock();
+    setInterval(syncClock, 15000);
+  </script>
+</body>
+</html>
